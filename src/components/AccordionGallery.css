@@ -1,0 +1,326 @@
+.accordion-gallery-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.accordion-gallery {
+  --ag-accent: #E27500;
+  --ag-overlay: #0B1320;
+  --ag-text: #ffffff;
+  --ag-gap: 14px;
+  --ag-radius: 24px;
+
+  display: flex;
+  flex-direction: row;
+  gap: var(--ag-gap);
+  width: 100%;
+  max-width: 100%;
+  min-height: 520px;
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+}
+
+.ag-panel {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 480px;
+  overflow: hidden;
+  border-radius: var(--ag-radius);
+  cursor: pointer;
+  display: block;
+  text-decoration: none;
+  outline: none;
+  background: #0F1C2E;
+  box-shadow: 0 12px 36px -12px rgba(0, 0, 0, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  will-change: flex-grow, transform;
+  -webkit-tap-highlight-color: transparent;
+  transition: flex-grow 0.5s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ag-panel:hover {
+  border-color: rgba(226, 117, 0, 0.5);
+}
+
+.ag-panel--active {
+  flex-grow: 3.6;
+  border-color: #E27500;
+  box-shadow: 0 20px 48px -12px rgba(226, 117, 0, 0.35), 0 0 0 1px rgba(226, 117, 0, 0.5);
+}
+
+.ag-panel:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--ag-accent),
+    0 10px 30px -18px rgba(0, 0, 0, 0.8);
+}
+
+.ag-panel__frame {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.ag-panel__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: grayscale(0.85) brightness(0.8);
+  transition: filter 0.45s ease, transform 0.45s ease;
+  will-change: transform, filter;
+}
+
+.ag-panel--active .ag-panel__media {
+  filter: grayscale(0) brightness(0.95);
+  transform: scale(1.02);
+}
+
+.ag-panel__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.ag-panel__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 19, 32, 0.1) 0%,
+    rgba(11, 19, 32, 0.4) 40%,
+    rgba(11, 19, 32, 0.95) 100%
+  );
+  transition: background 0.35s ease;
+}
+
+.ag-panel--active .ag-panel__overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(11, 19, 32, 0.05) 0%,
+    rgba(11, 19, 32, 0.3) 35%,
+    rgba(11, 19, 32, 0.94) 100%
+  );
+}
+
+/* Mentor Profile Info Layer */
+.ag-panel__label {
+  position: absolute;
+  left: 20px;
+  bottom: 22px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ag-panel__tag-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ag-panel__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(226, 117, 0, 0.25);
+  border: 1px solid rgba(226, 117, 0, 0.5);
+  color: #FFB783;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  width: fit-content;
+}
+
+.ag-panel__exp-badge {
+  display: none;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+.ag-panel--active .ag-panel__exp-badge {
+  display: inline-flex;
+}
+
+.ag-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ag-panel__bar {
+  flex: 0 0 auto;
+  width: 4px;
+  height: 28px;
+  border-radius: 4px;
+  background: var(--ag-accent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--ag-accent) 75%, transparent);
+}
+
+.ag-panel--active .ag-panel__bar {
+  height: 38px;
+}
+
+.ag-panel__text {
+  color: var(--ag-text);
+  font-family: inherit;
+  font-weight: 800;
+  font-size: clamp(1.05rem, 1.6vw, 1.5rem);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
+}
+
+.ag-panel__role {
+  color: #FFB783;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.9;
+}
+
+.ag-panel__subtext {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  margin-left: 14px;
+  max-width: 95%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  opacity: 0;
+  max-height: 0;
+  transition: opacity 0.35s ease, max-height 0.35s ease;
+}
+
+.ag-panel--active .ag-panel__subtext {
+  opacity: 1;
+  max-height: 80px;
+}
+
+.ag-panel__action {
+  margin-left: 14px;
+  margin-top: 2px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+
+.ag-panel--active .ag-panel__action {
+  opacity: 1;
+  max-height: 40px;
+}
+
+/* Inactive panel styling on desktop */
+@media (min-width: 641px) {
+  .ag-panel:not(.ag-panel--active) .ag-panel__role {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   SMOOTH MOBILE HORIZONTAL SNAP CAROUSEL (ZERO JITTER)
+   Eliminates vertical height expansion jumps on touch
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .accordion-gallery {
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    min-height: auto;
+    height: auto !important;
+    gap: 16px;
+    padding: 8px 4px 16px 4px;
+    perspective: none;
+  }
+
+  .accordion-gallery::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ag-panel {
+    flex: 0 0 85vw !important;
+    max-width: 320px;
+    height: 440px !important;
+    min-height: 440px !important;
+    scroll-snap-align: center;
+    border-radius: 20px;
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: none !important;
+  }
+
+  .ag-panel--active {
+    border-color: #E27500;
+    box-shadow: 0 16px 36px -10px rgba(226, 117, 0, 0.35);
+  }
+
+  /* All mobile cards always show their bio cleanly without sudden pop-ins */
+  .ag-panel .ag-panel__media {
+    filter: grayscale(0.2) brightness(0.9);
+  }
+
+  .ag-panel--active .ag-panel__media {
+    filter: grayscale(0) brightness(1);
+  }
+
+  .ag-panel .ag-panel__role {
+    display: block;
+  }
+
+  .ag-panel .ag-panel__exp-badge {
+    display: inline-flex;
+  }
+
+  .ag-panel .ag-panel__subtext {
+    opacity: 1;
+    max-height: 90px;
+    font-size: 0.78rem;
+  }
+
+  .ag-panel .ag-panel__action {
+    opacity: 1;
+    max-height: 40px;
+    margin-top: 4px;
+  }
+
+  .ag-panel .ag-panel__bar {
+    height: 36px;
+  }
+
+  .ag-panel .ag-panel__text {
+    font-size: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ag-panel,
+  .ag-panel__media {
+    transition: none !important;
+    will-change: auto;
+  }
+}
