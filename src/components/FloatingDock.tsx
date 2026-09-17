@@ -18,9 +18,9 @@ export const FloatingDock: React.FC = () => {
     { href: '#contact', label: 'Join', icon: MessageSquare, id: 'contact' },
   ];
 
-  // Zero-cost Active Section Detection via IntersectionObserver
+  // Active Section Detection: Home active at top, About not highlighted prematurely
   useEffect(() => {
-    const sectionIds = [
+    const sectionList = [
       { id: 'top', dockId: 'top' },
       { id: 'founder-vision', dockId: 'about' },
       { id: 'about-company', dockId: 'about' },
@@ -32,29 +32,60 @@ export const FloatingDock: React.FC = () => {
       { id: 'contact', dockId: 'contact' }
     ];
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const match = sectionIds.find((s) => s.id === entry.target.id);
-            if (match) {
-              setActiveSection(match.dockId);
-            }
-          }
-        });
-      },
-      {
-        rootMargin: '-20% 0px -60% 0px',
-        threshold: 0.1
+    let ticking = false;
+
+    const checkActive = () => {
+      const scrollY = window.scrollY;
+
+      // 1. Home must always be active when hero is visible near top
+      if (scrollY < 260) {
+        setActiveSection('top');
+        return;
       }
-    );
 
-    sectionIds.forEach(({ id }) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
+      // 2. Near bottom of page -> Contact / Join
+      if (window.innerHeight + scrollY >= document.documentElement.scrollHeight - 70) {
+        setActiveSection('contact');
+        return;
+      }
 
-    return () => observer.disconnect();
+      // 3. Trigger line accounts for sticky elements and viewport center
+      const triggerY = scrollY + window.innerHeight * 0.38;
+
+      let currentId = 'top';
+      for (const item of sectionList) {
+        const el = document.getElementById(item.id);
+        if (el) {
+          const top = el.offsetTop;
+          if (triggerY >= top) {
+            currentId = item.dockId;
+          }
+        }
+      }
+
+      setActiveSection(currentId);
+    };
+
+    const handleScrollActive = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          checkActive();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Initial check
+    checkActive();
+
+    window.addEventListener('scroll', handleScrollActive, { passive: true });
+    window.addEventListener('resize', handleScrollActive, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollActive);
+      window.removeEventListener('resize', handleScrollActive);
+    };
   }, []);
 
   // Lightweight scroll collapse handler (zero DOM reads)
@@ -84,7 +115,7 @@ export const FloatingDock: React.FC = () => {
 
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
-    if (href === '#') {
+    if (href === '#' || href === '#top') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       setActiveSection('top');
       return;
@@ -93,7 +124,10 @@ export const FloatingDock: React.FC = () => {
     const targetId = href.replace('#', '');
     const element = document.getElementById(targetId);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const targetY = element.getBoundingClientRect().top + window.scrollY - 30;
+      window.scrollTo({ top: targetY, behavior: 'smooth' });
+      const navItem = navItems.find((n) => n.href === href);
+      if (navItem) setActiveSection(navItem.id);
     }
   };
 
@@ -102,9 +136,6 @@ export const FloatingDock: React.FC = () => {
       aria-label="Floating Navigation"
       className={`ios-dock ${isCollapsed ? 'ios-dock--collapsed' : 'ios-dock--expanded'}`}
     >
-      {/* Liquid glass top specular refraction sweep */}
-      <div className="ios-dock__glow" />
-
       {/* Nav items container */}
       <div className="ios-dock__items">
         {navItems.map((item) => {
@@ -131,3 +162,5 @@ export const FloatingDock: React.FC = () => {
     </nav>
   );
 };
+
+export default FloatingDock;

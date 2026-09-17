@@ -1,357 +1,559 @@
-import React, { useMemo, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useTransform, animate, type MotionValue } from 'motion/react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { ChevronLeft, ChevronRight, Play, Pause, Calendar, Award, MapPin, Newspaper, Maximize2 } from 'lucide-react';
+import type { GalleryItemDto } from './Gallery';
 import './OrbitImages.css';
 
 export interface OrbitImagesProps {
-  images?: string[];
-  altPrefix?: string;
-  shape?: 'ellipse' | 'circle' | 'square' | 'rectangle' | 'triangle' | 'star' | 'heart' | 'infinity' | 'wave' | 'custom';
-  customPath?: string;
-  baseWidth?: number;
-  radiusX?: number;
-  radiusY?: number;
-  radius?: number;
-  starPoints?: number;
-  starInnerRatio?: number;
-  rotation?: number;
-  duration?: number;
-  itemSize?: number;
-  direction?: 'normal' | 'reverse';
-  fill?: boolean;
-  width?: number | string;
-  height?: number | string;
+  items: GalleryItemDto[];
+  onOpenLightbox: (item: GalleryItemDto) => void;
+  isLightboxOpen?: boolean;
   className?: string;
-  showPath?: boolean;
-  pathColor?: string;
-  pathWidth?: number;
-  easing?: 'linear' | 'easeIn' | 'easeOut' | 'easeInOut';
-  paused?: boolean;
-  centerContent?: React.ReactNode;
-  responsive?: boolean;
-  onImageClick?: (index: number) => void;
-}
-
-function generateEllipsePath(cx: number, cy: number, rx: number, ry: number): string {
-  return `M ${cx - rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx + rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx - rx} ${cy}`;
-}
-
-function generateCirclePath(cx: number, cy: number, r: number): string {
-  return generateEllipsePath(cx, cy, r, r);
-}
-
-function generateSquarePath(cx: number, cy: number, size: number): string {
-  const h = size / 2;
-  return `M ${cx - h} ${cy - h} L ${cx + h} ${cy - h} L ${cx + h} ${cy + h} L ${cx - h} ${cy + h} Z`;
-}
-
-function generateRectanglePath(cx: number, cy: number, w: number, h: number): string {
-  const hw = w / 2;
-  const hh = h / 2;
-  return `M ${cx - hw} ${cy - hh} L ${cx + hw} ${cy - hh} L ${cx + hw} ${cy + hh} L ${cx - hw} ${cy + hh} Z`;
-}
-
-function generateTrianglePath(cx: number, cy: number, size: number): string {
-  const height = (size * Math.sqrt(3)) / 2;
-  const hs = size / 2;
-  return `M ${cx} ${cy - height / 1.5} L ${cx + hs} ${cy + height / 3} L ${cx - hs} ${cy + height / 3} Z`;
-}
-
-function generateStarPath(cx: number, cy: number, outerR: number, innerR: number, points: number): string {
-  const step = Math.PI / points;
-  let path = '';
-  for (let i = 0; i < 2 * points; i++) {
-    const r = i % 2 === 0 ? outerR : innerR;
-    const angle = i * step - Math.PI / 2;
-    const x = cx + r * Math.cos(angle);
-    const y = cy + r * Math.sin(angle);
-    path += i === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
-  }
-  return path + ' Z';
-}
-
-function generateHeartPath(cx: number, cy: number, size: number): string {
-  const s = size / 30;
-  return `M ${cx} ${cy + 12 * s} C ${cx - 20 * s} ${cy - 5 * s}, ${cx - 12 * s} ${cy - 18 * s}, ${cx} ${cy - 8 * s} C ${cx + 12 * s} ${cy - 18 * s}, ${cx + 20 * s} ${cy - 5 * s}, ${cx} ${cy + 12 * s}`;
-}
-
-function generateInfinityPath(cx: number, cy: number, w: number, h: number): string {
-  const hw = w / 2;
-  const hh = h / 2;
-  return `M ${cx} ${cy} C ${cx + hw * 0.5} ${cy - hh}, ${cx + hw} ${cy - hh}, ${cx + hw} ${cy} C ${cx + hw} ${cy + hh}, ${cx + hw * 0.5} ${cy + hh}, ${cx} ${cy} C ${cx - hw * 0.5} ${cy + hh}, ${cx - hw} ${cy + hh}, ${cx - hw} ${cy} C ${cx - hw} ${cy - hh}, ${cx - hw * 0.5} ${cy - hh}, ${cx} ${cy}`;
-}
-
-function generateWavePath(cx: number, cy: number, w: number, amplitude: number, waves: number): string {
-  const pts: string[] = [];
-  const segs = waves * 20;
-  const hw = w / 2;
-  for (let i = 0; i <= segs; i++) {
-    const x = cx - hw + (w * i) / segs;
-    const y = cy + Math.sin((i / segs) * waves * 2 * Math.PI) * amplitude;
-    pts.push(i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`);
-  }
-  for (let i = segs; i >= 0; i--) {
-    const x = cx - hw + (w * i) / segs;
-    const y = cy - Math.sin((i / segs) * waves * 2 * Math.PI) * amplitude;
-    pts.push(`L ${x} ${y}`);
-  }
-  return pts.join(' ') + ' Z';
-}
-
-export interface OrbitImagesProps {
-  images?: string[];
-  itemIds?: string[];
-  altPrefix?: string;
-  shape?: 'ellipse' | 'circle' | 'square' | 'rectangle' | 'triangle' | 'star' | 'heart' | 'infinity' | 'wave' | 'custom';
-  customPath?: string;
-  baseWidth?: number;
-  radiusX?: number;
-  radiusY?: number;
-  radius?: number;
-  starPoints?: number;
-  starInnerRatio?: number;
-  rotation?: number;
-  duration?: number;
-  itemSize?: number;
-  direction?: 'normal' | 'reverse';
-  fill?: boolean;
-  width?: number | string;
-  height?: number | string;
-  className?: string;
-  showPath?: boolean;
-  pathColor?: string;
-  pathWidth?: number;
-  easing?: 'linear' | 'easeIn' | 'easeOut' | 'easeInOut';
-  paused?: boolean;
-  centerContent?: React.ReactNode;
-  responsive?: boolean;
-  onImageClick?: (index: number) => void;
-}
-
-interface OrbitItemProps {
-  item: React.ReactNode;
-  index: number;
-  layoutId?: string;
-  totalItems: number;
-  path: string;
-  itemSize: number;
-  rotation: number;
-  progress: MotionValue<number>;
-  fill: boolean;
-  onClick?: () => void;
-}
-
-function OrbitItem({
-  item,
-  index,
-  layoutId,
-  totalItems,
-  path,
-  itemSize,
-  rotation,
-  progress,
-  fill,
-  onClick
-}: OrbitItemProps) {
-  const itemOffset = fill ? (index / totalItems) * 100 : 0;
-
-  const offsetDistance = useTransform(progress, (p: number) => {
-    const offset = (((p + itemOffset) % 100) + 100) % 100;
-    return `${offset}%`;
-  });
-
-  const cardWidth = Math.round(itemSize * 1.34);
-  const cardHeight = Math.round(itemSize * 0.94);
-
-  return (
-    <motion.div
-      className="orbit-item"
-      onClick={onClick}
-      whileHover={{ scale: 1.08 }}
-      whileTap={{ scale: 0.96 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      style={{
-        width: cardWidth,
-        height: cardHeight,
-        offsetPath: `path("${path}")`,
-        offsetRotate: '0deg',
-        offsetAnchor: 'center center',
-        offsetDistance,
-      }}
-    >
-      <div style={{ width: '100%', height: '100%', transform: `rotate(${-rotation}deg)` }}>
-        <motion.div
-          layoutId={layoutId ? `gallery-img-${layoutId}` : undefined}
-          transition={{
-            type: "spring",
-            damping: 28,
-            stiffness: 280,
-            mass: 0.8,
-          }}
-          className="orbit-item-card"
-        >
-          {item}
-        </motion.div>
-      </div>
-    </motion.div>
-  );
 }
 
 export const OrbitImages: React.FC<OrbitImagesProps> = ({
-  images = [],
-  itemIds = [],
-  altPrefix = 'Orbiting image',
-  shape = 'ellipse',
-  customPath,
-  baseWidth = 1400,
-  radiusX = 700,
-  radiusY = 170,
-  radius = 300,
-  starPoints = 5,
-  starInnerRatio = 0.5,
-  rotation = -8,
-  duration = 40,
-  itemSize = 120,
-  direction = 'normal',
-  fill = true,
-  width = '100%',
-  height = 'auto',
-  className = '',
-  showPath = false,
-  pathColor = 'rgba(226, 117, 0, 0.25)',
-  pathWidth = 2,
-  easing = 'linear',
-  paused = false,
-  centerContent,
-  responsive = false,
-  onImageClick
+  items,
+  onOpenLightbox,
+  isLightboxOpen = false,
+  className = ''
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [scale, setScale] = useState<number | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
 
-  const designCenterX = baseWidth / 2;
-  const designCenterY = baseWidth / 2;
+  // Responsive stage width
+  const [stageWidth, setStageWidth] = useState<number>(1200);
 
-  const path = useMemo(() => {
-    switch (shape) {
-      case 'circle':
-        return generateCirclePath(designCenterX, designCenterY, radius);
-      case 'ellipse':
-        return generateEllipsePath(designCenterX, designCenterY, radiusX, radiusY);
-      case 'square':
-        return generateSquarePath(designCenterX, designCenterY, radius * 2);
-      case 'rectangle':
-        return generateRectanglePath(designCenterX, designCenterY, radiusX * 2, radiusY * 2);
-      case 'triangle':
-        return generateTrianglePath(designCenterX, designCenterY, radius * 2);
-      case 'star':
-        return generateStarPath(designCenterX, designCenterY, radius, radius * starInnerRatio, starPoints);
-      case 'heart':
-        return generateHeartPath(designCenterX, designCenterY, radius * 2);
-      case 'infinity':
-        return generateInfinityPath(designCenterX, designCenterY, radiusX * 2, radiusY * 2);
-      case 'wave':
-        return generateWavePath(designCenterX, designCenterY, radiusX * 2, radiusY, 3);
-      case 'custom':
-        return customPath || generateCirclePath(designCenterX, designCenterY, radius);
-      default:
-        return generateEllipsePath(designCenterX, designCenterY, radiusX, radiusY);
+  // Active center index for synchronized spotlight caption
+  const [activeCenterIndex, setActiveCenterIndex] = useState<number>(0);
+  const activeCenterIndexRef = useRef<number>(0);
+
+  // Controls state
+  const [isManualPaused, setIsManualPaused] = useState<boolean>(false);
+  const [isPlayingVisual, setIsPlayingVisual] = useState<boolean>(true);
+
+  // Animation controller refs for continuous smooth marquee
+  const continuousProgressRef = useRef<number>(0);
+  const isHoveredRef = useRef<boolean>(false);
+  const isFocusInsideRef = useRef<boolean>(false);
+  const isVisibleRef = useRef<boolean>(true);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isResumeWaitingRef = useRef<boolean>(false);
+  const isManualPausedRef = useRef<boolean>(false);
+  const isLightboxOpenRef = useRef<boolean>(isLightboxOpen);
+
+  // Drag tracking refs
+  const isDraggingRef = useRef<boolean>(false);
+  const dragStartXRef = useRef<number>(0);
+  const dragStartYRef = useRef<number>(0);
+  const dragOffsetStepRef = useRef<number>(0);
+  const didDragMoveRef = useRef<boolean>(false);
+
+  const rafIdRef = useRef<number | null>(null);
+  const lastTimestampRef = useRef<number>(performance.now());
+
+  const originalCount = items.length;
+
+  // Build display items: repeat items if list is short to ensure an uninterrupted, seamless infinite track
+  const displayItems = useMemo(() => {
+    if (items.length === 0) return [];
+    let list: Array<{ item: GalleryItemDto; originalIndex: number }> = items.map((item, idx) => ({
+      item,
+      originalIndex: idx,
+    }));
+    while (list.length < 10) {
+      list = [...list, ...items.map((item, idx) => ({ item, originalIndex: idx }))];
     }
-  }, [shape, customPath, designCenterX, designCenterY, radiusX, radiusY, radius, starPoints, starInnerRatio]);
+    return list;
+  }, [items]);
 
-  useLayoutEffect(() => {
-    if (!responsive || !containerRef.current) return;
-    const updateScale = () => {
-      if (!containerRef.current) return;
-      setScale(containerRef.current.clientWidth / baseWidth);
-    };
-    updateScale();
-    const observer = new ResizeObserver(updateScale);
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [responsive, baseWidth]);
+  const totalCards = displayItems.length;
 
-  const progress = useMotionValue(0);
+  // Keep refs synchronized
+  useEffect(() => {
+    isManualPausedRef.current = isManualPaused;
+    setIsPlayingVisual(!isManualPaused);
+  }, [isManualPaused]);
 
   useEffect(() => {
-    if (paused) return;
-    const controls = animate(progress, direction === 'reverse' ? -100 : 100, {
-      duration,
-      ease: easing,
-      repeat: Infinity,
-      repeatType: 'loop',
+    isLightboxOpenRef.current = isLightboxOpen;
+  }, [isLightboxOpen]);
+
+  // Responsive resize observer
+  useEffect(() => {
+    if (!stageRef.current) return;
+    const updateSize = () => {
+      if (stageRef.current) {
+        setStageWidth(stageRef.current.clientWidth);
+      }
+    };
+    updateSize();
+    const ro = new ResizeObserver(updateSize);
+    ro.observe(stageRef.current);
+    return () => ro.disconnect();
+  }, []);
+
+  // IntersectionObserver to pause when offscreen
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Geometry configuration: larger cards, tightly reduced gap, edge-to-edge full width
+  const isMobile = stageWidth < 768;
+  const isTablet = stageWidth >= 768 && stageWidth < 1100;
+  const isWide = stageWidth >= 1500;
+
+  // Increased prominent card sizes
+  const cardWidth = isMobile
+    ? Math.min(320, Math.round(stageWidth * 0.82))
+    : (isWide ? 500 : (isTablet ? 400 : 455));
+  const cardHeight = Math.round(cardWidth * 0.62);
+
+  // Tight, uniform gap between every card
+  const gap = isMobile ? 16 : (isWide ? 26 : 20);
+  const slotSpacing = cardWidth + gap;
+
+  // Rear shallow curve in Y and depth in Z
+  const radiusY = isMobile ? 45 : (isWide ? 90 : 75);
+  const radiusZ = isMobile ? 120 : (isWide ? 250 : 200);
+  const maxSpan = (stageWidth / 2) + cardWidth;
+
+  // Render transformed photo panels along rear oval arc with uniform spacing and constant marquee velocity
+  const renderCards = useCallback(() => {
+    if (!stageRef.current || totalCards === 0) return;
+    const cards = stageRef.current.querySelectorAll('.rear-oval-card') as NodeListOf<HTMLElement>;
+
+    // Current continuous marquee progress + user drag offset
+    const currentP = continuousProgressRef.current + dragOffsetStepRef.current;
+
+    let closestDist = Infinity;
+    let closestOriginalIdx = 0;
+
+    const fadeStart = (stageWidth / 2) - (cardWidth * 0.15);
+    const fadeEnd = (stageWidth / 2) + (cardWidth * 0.70);
+
+    cards.forEach((card) => {
+      const idxAttr = card.getAttribute('data-index');
+      if (idxAttr === null) return;
+      const idx = parseInt(idxAttr, 10);
+      if (idx >= displayItems.length) return;
+
+      // Distance in slots from center (0)
+      let d = (((idx + currentP) % totalCards) + totalCards) % totalCards;
+      if (d > totalCards / 2) {
+        d -= totalCards;
+      }
+
+      // Exact linear horizontal position (uniform spacing everywhere: gap is exactly 'gap' px)
+      const x = -d * slotSpacing;
+      const absX = Math.abs(x);
+
+      // Track closest card for synchronized spotlight
+      if (Math.abs(d) < closestDist) {
+        closestDist = Math.abs(d);
+        closestOriginalIdx = displayItems[idx].originalIndex;
+      }
+
+      // Hide cards that are completely offscreen
+      if (absX > fadeEnd) {
+        card.style.opacity = '0';
+        card.style.visibility = 'hidden';
+        card.style.pointerEvents = 'none';
+        card.setAttribute('aria-hidden', 'true');
+        card.setAttribute('tabindex', '-1');
+        return;
+      }
+
+      card.style.visibility = 'visible';
+
+      // Normalized horizontal coordinate along the rear oval
+      const u = Math.max(-1.3, Math.min(1.3, x / maxSpan));
+
+      // Parabolic curve: 1 at center (deepest), 0 at sides
+      const curveFactor = Math.max(0, 1 - Math.pow(Math.min(1, Math.abs(u)), 2));
+
+      // 3D coordinates along rear arc
+      const y = -radiusY * curveFactor;
+      const z = -radiusZ * curveFactor;
+
+      // Middle photos slightly more distant (0.86), side photos slightly larger (1.02)
+      const scale = 1.02 - 0.16 * curveFactor;
+
+      // Gentle inward perspective rotation while keeping photo fronts recognizable
+      const rotateY = -18 * Math.max(-1, Math.min(1, u));
+
+      // Opacity: solid across the stage, clean smooth fade only near the very edge of viewport
+      let opacity = 1.0;
+      if (absX > fadeStart) {
+        opacity = Math.max(0, 1 - (absX - fadeStart) / (fadeEnd - fadeStart));
+      }
+
+      // Depth brightness: subtle depth feel
+      const brightness = 1.0 - 0.10 * curveFactor;
+      const zIndex = Math.round(100 * (1 - curveFactor));
+
+      card.style.transform = `translate(-50%, -50%) translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, ${z.toFixed(1)}px) rotateY(${rotateY.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+      card.style.opacity = opacity.toFixed(3);
+      card.style.filter = `brightness(${brightness.toFixed(3)})`;
+      card.style.zIndex = `${zIndex}`;
+      card.style.pointerEvents = opacity < 0.2 ? 'none' : 'auto';
+      card.setAttribute('aria-hidden', opacity < 0.25 ? 'true' : 'false');
+      card.setAttribute('tabindex', opacity < 0.25 ? '-1' : '0');
+
+      if (Math.abs(d) < 0.45) {
+        card.classList.add('rear-oval-card--active');
+      } else {
+        card.classList.remove('rear-oval-card--active');
+      }
     });
-    return () => controls.stop();
-  }, [progress, duration, easing, direction, paused]);
 
-  const containerWidth = responsive ? '100%' : (typeof width === 'number' ? `${width}px` : width);
-  const containerHeight = responsive ? 'auto' : (typeof height === 'number' ? `${height}px` : height);
+    // Update active spotlight only when changed to avoid re-rendering frames
+    if (activeCenterIndexRef.current !== closestOriginalIdx) {
+      activeCenterIndexRef.current = closestOriginalIdx;
+      setActiveCenterIndex(closestOriginalIdx);
+    }
+  }, [totalCards, displayItems, slotSpacing, stageWidth, cardWidth, maxSpan, radiusY, radiusZ]);
 
-  const items = images.map((src, index) => (
-    <img
-      key={index}
-      src={src}
-      alt={`${altPrefix} ${index + 1}`}
-      draggable={false}
-      className="orbit-image"
-    />
-  ));
+  // Main continuous marquee animation frame loop
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      renderCards();
+      return;
+    }
+
+    const tick = (now: number) => {
+      const dt = Math.min(100, now - lastTimestampRef.current);
+      lastTimestampRef.current = now;
+
+      const isPaused =
+        isManualPausedRef.current ||
+        isHoveredRef.current ||
+        isFocusInsideRef.current ||
+        isLightboxOpenRef.current ||
+        !isVisibleRef.current ||
+        isResumeWaitingRef.current ||
+        isDraggingRef.current;
+
+      if (!isPaused && totalCards > 0) {
+        // Continuous smooth marquee flow: ~4 seconds per card
+        const marqueeSpeed = 0.00025; // slots per ms
+        continuousProgressRef.current = (continuousProgressRef.current + marqueeSpeed * dt) % totalCards;
+      }
+
+      renderCards();
+      rafIdRef.current = requestAnimationFrame(tick);
+    };
+
+    lastTimestampRef.current = performance.now();
+    rafIdRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+    };
+  }, [totalCards, renderCards]);
+
+  // Hover handlers: immediately freeze, and resume 1 second after pointer leaves
+  const handlePointerEnter = useCallback(() => {
+    isHoveredRef.current = true;
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+    isResumeWaitingRef.current = false;
+  }, []);
+
+  const handlePointerLeave = useCallback(() => {
+    isHoveredRef.current = false;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+
+    // Wait exactly 1 second after pointer leaves before resuming smoothly
+    isResumeWaitingRef.current = true;
+    resumeTimerRef.current = setTimeout(() => {
+      isResumeWaitingRef.current = false;
+      lastTimestampRef.current = performance.now();
+    }, 1000);
+  }, []);
+
+  // Keyboard focus handlers
+  const handleFocus = useCallback(() => {
+    isFocusInsideRef.current = true;
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    isFocusInsideRef.current = false;
+  }, []);
+
+  // Manual Previous/Next navigation
+  const handlePrev = useCallback(() => {
+    if (totalCards === 0) return;
+    continuousProgressRef.current = (continuousProgressRef.current - 1 + totalCards) % totalCards;
+    renderCards();
+  }, [totalCards, renderCards]);
+
+  const handleNext = useCallback(() => {
+    if (totalCards === 0) return;
+    continuousProgressRef.current = (continuousProgressRef.current + 1) % totalCards;
+    renderCards();
+  }, [totalCards, renderCards]);
+
+  // Manual Play/Pause toggle
+  const togglePlayPause = useCallback(() => {
+    setIsManualPaused((prev) => !prev);
+  }, []);
+
+  // Drag / Touch gestures
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0) return;
+    isDraggingRef.current = true;
+    didDragMoveRef.current = false;
+    dragStartXRef.current = e.clientX;
+    dragStartYRef.current = e.clientY;
+    dragOffsetStepRef.current = 0;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    const dx = e.clientX - dragStartXRef.current;
+    const dy = e.clientY - dragStartYRef.current;
+
+    // Distinguish intentional drag from accidental tap
+    if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+      didDragMoveRef.current = true;
+    }
+
+    // Convert horizontal pixel drag into fractional slot progress
+    const stepDelta = -(dx / slotSpacing);
+    dragOffsetStepRef.current = stepDelta;
+    renderCards();
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {
+      // Ignored
+    }
+
+    // Apply drag offset smoothly to continuous progress
+    const offset = dragOffsetStepRef.current;
+    continuousProgressRef.current = (continuousProgressRef.current + offset + totalCards * 10) % totalCards;
+    dragOffsetStepRef.current = 0;
+
+    // 1-second delay before resuming marquee
+    isResumeWaitingRef.current = true;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => {
+      isResumeWaitingRef.current = false;
+      lastTimestampRef.current = performance.now();
+    }, 1000);
+
+    renderCards();
+  };
+
+  const handleCardClick = (item: GalleryItemDto) => {
+    // Only open lightbox if it was a pure click, not an accidental drag gesture
+    if (!didDragMoveRef.current) {
+      onOpenLightbox(item);
+    }
+  };
+
+  const currentCenterItem = items[activeCenterIndex] || items[0];
+
+  const statIcon = useMemo(() => {
+    if (!currentCenterItem) return Calendar;
+    switch (currentCenterItem.statIcon) {
+      case 'award':
+        return Award;
+      case 'map-pin':
+        return MapPin;
+      case 'newspaper':
+        return Newspaper;
+      default:
+        return Calendar;
+    }
+  }, [currentCenterItem]);
+
+  const StatIconComponent = statIcon;
 
   return (
     <div
       ref={containerRef}
-      className={`orbit-container ${className}`.trim()}
-      style={{
-        width: containerWidth,
-        height: containerHeight,
-        aspectRatio: responsive ? '1.8 / 1' : undefined,
-      }}
-      aria-label="Orbiting Photo Gallery"
+      className={`rear-oval-carousel ${className}`}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      aria-label="Interactive Archival Photographs Carousel"
     >
-      <div
-        className={responsive ? 'orbit-scaling-container orbit-scaling-container--responsive' : 'orbit-scaling-container'}
-        style={{
-          width: responsive ? baseWidth : '100%',
-          height: responsive ? baseWidth : '100%',
-          transform: responsive && scale !== null ? `translate(-50%, -50%) scale(${scale})` : undefined,
-          visibility: responsive && scale === null ? 'hidden' : undefined,
-        }}
-      >
-        <div
-          className="orbit-rotation-wrapper"
-          style={{ transform: `rotate(${rotation}deg)` }}
-        >
-          {showPath && (
-            <svg
-              width="100%"
-              height="100%"
-              viewBox={`0 0 ${baseWidth} ${baseWidth}`}
-              className="orbit-path-svg"
-            >
-              <path d={path} fill="none" stroke={pathColor} strokeWidth={pathWidth / (scale ?? 1)} />
-            </svg>
-          )}
+      {/* ─── Top Manual Controls Bar ─── */}
+      <div className="rear-oval-controls-bar">
+        <div className="rear-oval-nav-btns">
+          <button
+            onClick={handlePrev}
+            className="rear-oval-btn"
+            aria-label="Previous photograph"
+            title="Previous (Left arrow)"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
 
-          {items.map((item, index) => (
-            <OrbitItem
-              key={index}
-              item={item}
-              index={index}
-              layoutId={itemIds?.[index]}
-              totalItems={items.length}
-              path={path}
-              itemSize={itemSize}
-              rotation={rotation}
-              progress={progress}
-              fill={fill}
-              onClick={() => onImageClick?.(index)}
-            />
+          <button
+            onClick={togglePlayPause}
+            className={`rear-oval-btn ${!isPlayingVisual ? 'rear-oval-btn--active' : ''}`}
+            aria-label={isPlayingVisual ? 'Pause autoplay' : 'Play autoplay'}
+            title={isPlayingVisual ? 'Pause (Space)' : 'Play (Space)'}
+          >
+            {isPlayingVisual ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          </button>
+
+          <button
+            onClick={handleNext}
+            className="rear-oval-btn"
+            aria-label="Next photograph"
+            title="Next (Right arrow)"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Counter indicator */}
+        <div className="rear-oval-counter">
+          <span className="text-[#FFB783] font-bold">{activeCenterIndex + 1}</span>
+          <span className="text-gray-500 mx-1">/</span>
+          <span className="text-gray-400">{originalCount}</span>
+        </div>
+      </div>
+
+      {/* ─── 3D Rear Oval Stage (Uniform spacing, reduced gap, no glowing line) ─── */}
+      <div
+        ref={stageRef}
+        className="rear-oval-stage"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        role="region"
+        aria-live="polite"
+      >
+        <div className="rear-oval-track">
+          {displayItems.map((entry, idx) => (
+            <div
+              key={`${entry.item.id}-${idx}`}
+              data-index={idx}
+              className="rear-oval-card"
+              style={{
+                width: `${cardWidth}px`,
+                height: `${cardHeight}px`,
+              }}
+              onClick={() => handleCardClick(entry.item)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onOpenLightbox(entry.item);
+                }
+              }}
+              aria-label={`Enlarge photo: ${entry.item.title}`}
+            >
+              <div className="rear-oval-card__inner">
+                <img
+                  src={entry.item.image.url}
+                  alt={entry.item.image.alt}
+                  draggable={false}
+                  className="rear-oval-card__img"
+                />
+                <div className="rear-oval-card__gradient" />
+
+                {/* Card Header Badge */}
+                <div className="rear-oval-card__badge-row">
+                  <span className="rear-oval-card__badge">
+                    {entry.item.badge}
+                  </span>
+                  <span className="rear-oval-card__expand-hint">
+                    <Maximize2 className="w-3.5 h-3.5 text-white/80" />
+                  </span>
+                </div>
+
+                {/* Card Bottom Title Overlay */}
+                <div className="rear-oval-card__caption">
+                  <h4 className="rear-oval-card__title">
+                    {entry.item.title}
+                  </h4>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
 
-      {centerContent && (
-        <div className="orbit-center-content">
-          {centerContent}
+      {/* ─── Lower Foreground Synchronized Spotlight & Caption ─── */}
+      {currentCenterItem && (
+        <div className="rear-oval-spotlight">
+          <div className="rear-oval-spotlight__content">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+              <div className="inline-flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-[#E27500]/20 border border-[#E27500]/40 text-[#FFB783] text-xs font-bold uppercase tracking-wider">
+                  {currentCenterItem.categoryLabel}
+                </span>
+                <span className="text-xs font-mono text-gray-400">
+                  {currentCenterItem.chapter}
+                </span>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 text-xs text-gray-400 font-medium">
+                <StatIconComponent className="w-3.5 h-3.5 text-[#E27500]" />
+                <span>{currentCenterItem.stat}</span>
+              </div>
+            </div>
+
+            <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-2">
+              {currentCenterItem.title}
+            </h3>
+
+            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-4 max-w-3xl">
+              {currentCenterItem.description}
+            </p>
+
+            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+              <button
+                onClick={() => onOpenLightbox(currentCenterItem)}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FFB783] hover:text-white transition-colors cursor-pointer group"
+                aria-label="Enlarge full resolution photo in lightbox"
+              >
+                <span>Click to view full archival photo</span>
+                <Maximize2 className="w-3.5 h-3.5 group-hover:scale-110 transition-transform" />
+              </button>
+
+              {/* Navigation dots */}
+              <div className="flex items-center gap-1.5">
+                {items.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      continuousProgressRef.current = (totalCards - i + totalCards * 10) % totalCards;
+                      renderCards();
+                    }}
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      activeCenterIndex === i ? 'w-6 bg-[#E27500]' : 'bg-white/20 hover:bg-white/40'
+                    }`}
+                    aria-label={`Go to photo ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

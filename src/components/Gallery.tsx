@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { LayoutGrid as LayoutGridIcon, Orbit, X, AlertTriangle, Maximize2, Tag, Calendar, ShieldAlert, Sparkles } from 'lucide-react';
-import { LayoutGrid } from './ui/layout-grid';
+import { X, Calendar, ShieldAlert } from 'lucide-react';
 import { OrbitImages } from './OrbitImages';
 import './Gallery.css';
 
@@ -18,8 +17,6 @@ export interface GalleryItemDto {
 }
 
 export const Gallery: React.FC = () => {
-  const [viewMode, setViewMode] = useState<'orbit' | 'grid'>('orbit');
-  const [activeCategory, setActiveCategory] = useState<string>('All');
   const [selectedItem, setSelectedItem] = useState<GalleryItemDto | null>(null);
 
   // Archival & Conclave Items including generated event photos
@@ -152,12 +149,6 @@ export const Gallery: React.FC = () => {
     }
   ];
 
-  const categories = ['All', 'Events & Expos', 'Press Coverage', 'Awards & Recognition'];
-
-  const filteredItems = activeCategory === 'All'
-    ? galleryItems
-    : galleryItems.filter((item) => item.categoryLabel === activeCategory);
-
   // Body scroll lock during Lightbox
   useEffect(() => {
     if (selectedItem) {
@@ -180,104 +171,30 @@ export const Gallery: React.FC = () => {
   }, []);
 
   return (
-    <section id="gallery" className="w-full py-16 sm:py-24 bg-[#080E18] text-white border-b border-gray-800 relative overflow-hidden">
+    <section id="gallery" className="w-full py-12 sm:py-16 bg-[#080E18] text-white border-b border-gray-800 relative overflow-hidden">
       {/* Background radial glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#E27500]/10 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-        
         {/* Header */}
-        <div className="flex flex-col items-center text-center mb-10 gap-3 max-w-3xl mx-auto">
+        <div className="flex flex-col items-center text-center mb-6 gap-2 max-w-3xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Moments From Mi Udyojak Honarach
           </h2>
           <p className="text-sm sm:text-base text-gray-300">
-            Archival photographs, press features, and conclave moments from regional business forums. Click any orbiting photo to enlarge.
+            Archival photographs, press features, and conclave moments from regional business forums. Click any photograph to enlarge.
           </p>
         </div>
+      </div>
 
-        {/* Clean Orbit Carousel Mode */}
-        {viewMode === 'orbit' && (
-          <div className="w-full py-8 relative flex items-center justify-center min-h-[560px] sm:min-h-[660px] overflow-visible">
-            <OrbitImages
-              images={galleryItems.map((item) => item.image.url)}
-              itemIds={galleryItems.map((item) => item.id)}
-              paused={Boolean(selectedItem)}
-              shape="ellipse"
-              baseWidth={1250}
-              radiusX={540}
-              radiusY={175}
-              rotation={-6}
-              duration={38}
-              itemSize={180}
-              responsive={true}
-              showPath={false}
-              onImageClick={(idx) => setSelectedItem(galleryItems[idx])}
-            />
-          </div>
-        )}
-
-        {/* Animated Layout Grid Mode */}
-        {viewMode === 'grid' && (
-          <div className="space-y-8">
-            {/* Category Filter Pills */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                    activeCategory === cat
-                      ? 'bg-[#E27500] text-white shadow-lg shadow-[#E27500]/30'
-                      : 'bg-white/10 text-gray-300 border border-white/10 hover:border-[#E27500] hover:text-[#FFB783]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* LayoutGrid with masonry-like spans */}
-            <LayoutGrid
-              cards={filteredItems.map((item, idx) => {
-                // Create a masonry-like layout pattern
-                const spanPatterns = [
-                  'md:col-span-2 md:row-span-2',  // Large hero
-                  'md:col-span-1 md:row-span-1',  // Standard
-                  'md:col-span-1 md:row-span-1',  // Standard
-                  'md:col-span-2 md:row-span-1',  // Wide
-                  'md:col-span-1 md:row-span-1',  // Standard
-                  'md:col-span-1 md:row-span-2',  // Tall
-                  'md:col-span-1 md:row-span-1',  // Standard
-                  'md:col-span-1 md:row-span-1',  // Standard
-                  'md:col-span-1 md:row-span-1',  // Standard
-                ];
-                return {
-                  id: idx + 1,
-                  className: spanPatterns[idx % spanPatterns.length],
-                  thumbnail: item.image.url,
-                  content: (
-                    <div className="text-white space-y-2">
-                      <span className="inline-block px-2.5 py-1 rounded-full bg-[#E27500]/30 border border-[#E27500]/50 text-[#FFB783] text-[10px] font-bold uppercase tracking-wider">
-                        {item.chapter}
-                      </span>
-                      <h4 className="text-lg sm:text-xl font-extrabold leading-snug drop-shadow-lg">
-                        {item.title}
-                      </h4>
-                      <p className="text-xs sm:text-sm text-gray-200 leading-relaxed line-clamp-2">
-                        {item.description}
-                      </p>
-                      <div className="flex items-center gap-2 pt-1 text-[11px] text-gray-300">
-                        <Calendar className="w-3 h-3 text-[#E27500]" />
-                        <span>{item.stat}</span>
-                      </div>
-                    </div>
-                  ),
-                };
-              })}
-            />
-          </div>
-        )}
+      {/* Clean Orbit Carousel Mode (Full-Screen Viewport Width Edge-to-Edge) */}
+      <div className="w-full relative z-10 overflow-x-clip py-2">
+        <OrbitImages
+          items={galleryItems}
+          onOpenLightbox={(item) => setSelectedItem(item)}
+          isLightboxOpen={Boolean(selectedItem)}
+        />
+      </div>
 
         {/* 60fps Jitter-Free Shared Element Morphing Lightbox Modal */}
         <AnimatePresence>
@@ -362,8 +279,6 @@ export const Gallery: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
-
-      </div>
     </section>
   );
 };

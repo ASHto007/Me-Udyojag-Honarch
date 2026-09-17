@@ -1,0 +1,28 @@
+.tilted-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  perspective: 1000px;
+  overflow: visible;
+}
+
+.tilted-card__inner {
+  flex: 1;
+  min-width: 0;
+  transform-origin: center;
+}
+
+.tilted-card:focus-within {
+  z-index: 1;
+}
+
+.tilted-card__inner:focus-within {
+  outline: 2px solid #e27500;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse), (max-width: 639px) {
+  .tilted-card__inner {
+    transform: none !important;
+  }
+}

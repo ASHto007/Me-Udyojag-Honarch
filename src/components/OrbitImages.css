@@ -1,86 +1,302 @@
-.orbit-container {
+/* ==========================================================================
+   Rear-Oval Arc Gallery Carousel Styles (Continuous Marquee & Larger Cards)
+   ========================================================================== */
+
+.rear-oval-carousel {
   position: relative;
-  margin-left: auto;
-  margin-right: auto;
+  width: 100%;
+  max-width: 100vw;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+/* ─── Top Controls Bar (Tight Vertical Gap) ─── */
+.rear-oval-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 1.5rem 0.5rem 1.5rem;
+  z-index: 25;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.rear-oval-nav-btns {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rear-oval-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  outline: none;
+}
+
+.rear-oval-btn:hover {
+  background: #E27500;
+  border-color: #E27500;
+  color: #FFFFFF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(226, 117, 0, 0.4);
+}
+
+.rear-oval-btn:active {
+  transform: translateY(0);
+}
+
+.rear-oval-btn:focus-visible {
+  box-shadow: 0 0 0 2px #E27500, 0 0 0 4px rgba(0, 0, 0, 0.8);
+}
+
+.rear-oval-btn--active {
+  background: #E27500;
+  border-color: #E27500;
+  color: #FFFFFF;
+  box-shadow: 0 0 12px rgba(226, 117, 0, 0.4);
+}
+
+.rear-oval-counter {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  background: rgba(17, 24, 39, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 0.875rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── 3D Stage along Rear Oval Arc (Accommodates Larger Cards Seamlessly) ─── */
+.rear-oval-stage {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: pan-y;
   overflow: visible;
+  padding: 0.25rem 0;
+  box-sizing: border-box;
 }
 
-.orbit-scaling-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
+@media (min-width: 640px) {
+  .rear-oval-stage {
+    height: 440px;
+  }
 }
 
-.orbit-scaling-container--responsive {
+@media (min-width: 1024px) {
+  .rear-oval-stage {
+    height: 500px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .rear-oval-stage {
+    height: 560px;
+  }
+}
+
+.rear-oval-stage:active {
+  cursor: grabbing;
+}
+
+.rear-oval-track {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform-origin: center center;
-}
-
-.orbit-rotation-wrapper {
-  width: 100%;
-  height: 100%;
-  transform-origin: center center;
-  position: relative;
-}
-
-.orbit-path-svg {
-  position: absolute;
-  inset: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
 }
 
-.orbit-item {
+/* ─── Individual Larger Photo Cards with Reduced Gap ─── */
+.rear-oval-card {
   position: absolute;
-  will-change: transform;
-  user-select: none;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
   cursor: pointer;
-  z-index: 5;
+  outline: none;
+  pointer-events: auto;
+  transition: box-shadow 0.25s ease;
 }
 
-.orbit-item-card {
+.rear-oval-card__inner {
   width: 100%;
   height: 100%;
-  border-radius: 20px;
+  border-radius: 22px;
   overflow: hidden;
-  background: #101B2B;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(226, 117, 0, 0.15);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
   position: relative;
+  background: #0F172A;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.8), 0 4px 12px rgba(0, 0, 0, 0.45);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.orbit-item:hover .orbit-item-card {
-  transform: scale(1.08);
+.rear-oval-card:hover .rear-oval-card__inner {
+  transform: translateY(-4px) scale(1.02);
+  border-color: #FFB783;
+  box-shadow: 0 24px 52px -6px rgba(226, 117, 0, 0.45), 0 0 0 1px #E27500;
+}
+
+.rear-oval-card--active .rear-oval-card__inner {
   border-color: #E27500;
-  box-shadow: 0 20px 48px -10px rgba(226, 117, 0, 0.45), 0 0 0 3px rgba(226, 117, 0, 0.6);
-  z-index: 30;
+  box-shadow: 0 20px 46px -6px rgba(226, 117, 0, 0.4), 0 0 0 1.5px #E27500;
 }
 
-.orbit-image {
+.rear-oval-card:focus-visible .rear-oval-card__inner {
+  outline: 2px solid #E27500;
+  outline-offset: 2px;
+}
+
+.rear-oval-card__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-}
-
-.orbit-center-content {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
+  user-select: none;
   pointer-events: none;
 }
 
-.orbit-center-content > * {
-  pointer-events: auto;
+.rear-oval-card__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.5) 0%,
+    rgba(0, 0, 0, 0.02) 35%,
+    rgba(0, 0, 0, 0.25) 60%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+  pointer-events: none;
 }
 
-@media (max-width: 640px) {
-  .orbit-container {
-    max-width: 100vw;
+.rear-oval-card__badge-row {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.rear-oval-card__badge {
+  padding: 4px 11px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFB783;
+  letter-spacing: 0.02em;
+}
+
+.rear-oval-card__expand-hint {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.rear-oval-card__caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 16px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.rear-oval-card__title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #FFFFFF;
+  line-height: 1.35;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .rear-oval-card__title {
+    font-size: 16px;
+  }
+}
+
+/* ─── Lower Foreground Synchronized Spotlight & Metadata (Reduced Gap) ─── */
+.rear-oval-spotlight {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin-top: 0.5rem;
+  z-index: 20;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
+}
+
+.rear-oval-spotlight__content {
+  background: rgba(17, 24, 39, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 14px 38px -8px rgba(0, 0, 0, 0.65);
+  transition: all 0.3s ease;
+}
+
+/* ─── Reduced-Motion Accessibility ─── */
+@media (prefers-reduced-motion: reduce) {
+  .rear-oval-stage {
+    perspective: none;
+  }
+
+  .rear-oval-card,
+  .rear-oval-card__inner,
+  .rear-oval-btn {
+    transition: none !important;
   }
 }

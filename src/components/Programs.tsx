@@ -132,9 +132,6 @@ export const Programs: React.FC = () => {
 
         {/* Section Header */}
         <div className="flex flex-col items-center text-center mb-10 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FEF3C7] text-[#92400E] text-xs font-bold uppercase tracking-wider mb-3">
-            <span>SUPPORT ECOSYSTEM</span>
-          </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#111827] tracking-tight">
             Services &amp; Core Initiatives
           </h2>

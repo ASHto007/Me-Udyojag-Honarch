@@ -1,5 +1,7 @@
 import React from 'react';
-import { Target, Compass, Sparkles, Building2, TrendingUp, Users, ShieldCheck, ArrowRight, Award, Lightbulb } from 'lucide-react';
+import './AboutCompany.css';
+import { TiltedCard } from './motion/TiltedCard';
+import { Target, Compass, Building2, TrendingUp, Users, ShieldCheck, ArrowRight, Award, Lightbulb } from 'lucide-react';
 
 export const AboutCompany: React.FC = () => {
   const pillars = [
@@ -131,33 +133,38 @@ export const AboutCompany: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
             {pillars.map((pillar, idx) => {
               const Icon = pillar.icon;
               return (
-                <div 
+                <TiltedCard
                   key={idx}
-                  className="p-6 rounded-2xl bg-[#FCFBF9] border border-[#EAEAEA] hover:border-[#E27500]/50 hover:bg-white transition-all duration-300 group shadow-sm hover:shadow-lg hover:-translate-y-1"
+                  className="pillar-card"
+                  rotateAmplitude={5}
+                  scaleOnHover={1.025}
+                  showMobileWarning={false}
+                  showTooltip={false}
                 >
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="w-10 h-10 rounded-xl bg-[#E27500]/10 text-[#E27500] flex items-center justify-center group-hover:bg-[#E27500] group-hover:text-white transition-colors duration-300">
-                      <Icon className="w-5 h-5" />
+                  <div className="pillar-card__top" aria-hidden="true">
+                    <div className="pillar-card__icon">
+                      <Icon className="w-6 h-6" />
                     </div>
-                    <span className="text-[11px] font-semibold text-[#E27500] bg-[#E27500]/10 px-2.5 py-1 rounded-full border border-[#E27500]/20">
-                      {pillar.highlight}
-                    </span>
+                    <span className="pillar-card__number">0{idx + 1}</span>
                   </div>
 
-                  <div className="text-xs font-marathi font-bold text-[#E27500] mb-1">
+                  <div className="pillar-card__marathi font-marathi" lang="mr">
                     {pillar.marathiTitle}
                   </div>
-                  <h4 className="text-base font-bold text-[#111827] mb-2 leading-snug">
+                  <h4 className="pillar-card__title">
                     {pillar.title}
                   </h4>
-                  <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                  <p className="pillar-card__description">
                     {pillar.desc}
                   </p>
-                </div>
+                  <div className="pillar-card__footer">
+                    <span className="pillar-card__badge">{pillar.highlight}</span>
+                  </div>
+                </TiltedCard>
               );
             })}
           </div>

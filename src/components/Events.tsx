@@ -18,10 +18,6 @@ export const Events: React.FC = () => {
 
         {/* Featured Upcoming Event Card */}
         <div className="rounded-3xl overflow-hidden border-2 border-[#E27500] bg-gradient-to-br from-[#FFFBEB] via-white to-orange-50/40 p-6 sm:p-10 shadow-lg mb-12 relative">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E27500] text-white text-xs font-extrabold uppercase tracking-wider mb-6">
-            <span>UPCOMING FLAGSHIP EXPO 2026</span>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-8 space-y-4">
               <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#111827] tracking-tight leading-tight">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Quote, AlertCircle, Sparkles } from 'lucide-react';
+import { Quote } from 'lucide-react';
 
 export const Founder: React.FC = () => {
   return (
@@ -18,41 +18,39 @@ export const Founder: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
-          {/* Left: Founder Editorial Frame / Candidate Photo Container */}
+          {/* Left: Founder Editorial Frame */}
           <div className="lg:col-span-5">
             <div className="relative mx-auto max-w-md">
               {/* Backing decorative saffron accent */}
               <div className="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-[#E27500]/30 to-[#E27500]/5 -rotate-1" />
 
               {/* Photo Card Shell */}
-              <div className="relative rounded-2xl overflow-hidden bg-[#0D1829] border border-[#1e2f4a] shadow-xl shadow-black/40">
-                {/* Candidate Photo Frame */}
-                <div className="w-full aspect-[4/5] bg-gradient-to-b from-[#0D1829] to-[#111f35] flex flex-col items-center justify-center p-8 text-center relative">
-                  <div className="w-24 h-24 rounded-full bg-[#0B1320] shadow-inner flex items-center justify-center mb-4 border-2 border-dashed border-[#E27500]/60">
-                    <Sparkles className="w-10 h-10 text-[#E27500]" />
-                  </div>
-                  
-                  <h4 className="text-xl font-bold text-white mb-1">Nilesh More</h4>
-                  <p className="text-xs font-semibold text-[#FFB783] uppercase tracking-wider mb-4">
-                    Founder &amp; Convener
-                  </p>
+              <div className="relative rounded-2xl overflow-hidden bg-[#0D1829] border border-[#1e2f4a] shadow-xl shadow-black/40 group">
+                {/* Real Founder Photo Frame */}
+                <div className="relative w-full aspect-[4/5] overflow-hidden bg-[#0B1320]">
+                  <img
+                    src="/assets/nilesh-more.jpg"
+                    alt="Nilesh More - Founder & Convener"
+                    className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0D1829] via-transparent to-transparent opacity-80" />
 
-                  <div className="pending-placeholder">
-                    [PENDING CLIENT INPUT — final photo selection and crop approval, item 02-08]
+                  {/* Floating Founder Badge */}
+                  <div className="absolute top-4 right-4 px-3.5 py-1 rounded-full bg-[#E27500] text-white text-xs font-bold shadow-lg shadow-[#E27500]/40">
+                    Founder &amp; Convener
                   </div>
                 </div>
 
                 {/* Founder Info Bar */}
-                <div className="p-6 bg-[#0B1320] border-t border-white/10">
-                  <div className="flex items-center justify-between text-xs text-gray-400">
-                    <span>Founder &amp; Convener</span>
+                <div className="p-6 bg-[#0D1829] border-t border-white/10 relative z-10">
+                  <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+                    <span className="text-[#FFB783] font-semibold uppercase tracking-wider text-[11px]">Movement Architect</span>
                     <span className="font-semibold text-white">Mi Udyojak Honarach</span>
                   </div>
-                  <div className="mt-3">
-                    <div className="pending-placeholder text-[11px] w-full text-center">
-                      [PENDING CLIENT INPUT — founder designation &amp; biography, items 02-07, 04-04]
-                    </div>
-                  </div>
+                  <h3 className="text-xl font-extrabold text-white">Nilesh More</h3>
+                  <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                    Entrepreneur, Educator &amp; Community Builder empowering first-generation business creators across Maharashtra.
+                  </p>
                 </div>
               </div>
             </div>
@@ -71,9 +69,8 @@ export const Founder: React.FC = () => {
                 <span className="text-sm font-bold text-white">
                   — Nilesh More
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] text-[#FFB783] font-medium bg-[#E27500]/15 px-2.5 py-1 rounded border border-[#E27500]/30">
-                  <AlertCircle className="w-3 h-3 text-[#E27500]" />
-                  [UNCONFIRMED ATTRIBUTION — pending client sign-off, item 04-06]
+                <span className="inline-flex items-center gap-1 text-[11px] text-[#FFB783] font-semibold bg-[#E27500]/15 px-2.5 py-1 rounded-full border border-[#E27500]/30">
+                  Founder Vision
                 </span>
               </div>
             </div>

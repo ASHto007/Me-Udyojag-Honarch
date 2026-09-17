@@ -1,5 +1,5 @@
 import './App.css';
-import { Header } from './components/Header';
+import { BrandLogoTab } from './components/BrandLogoTab';
 import { Hero } from './components/Hero';
 import { Stats } from './components/Stats';
 import { Founder } from './components/Founder';
@@ -16,9 +16,9 @@ import { FloatingDock } from './components/FloatingDock';
 
 function App() {
   return (
-    <div className="min-h-screen bg-[#FCFBF9] text-[#333333] antialiased">
-      {/* Top Header with Brand Logo */}
-      <Header />
+    <div className="min-h-screen bg-[#FCFBF9] text-[#333333] antialiased relative">
+      {/* Standalone Fixed Hanging Brand Logo Tab */}
+      <BrandLogoTab />
 
       {/* Main Content Sections */}
       <main className="w-full">

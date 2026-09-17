@@ -1,38 +1,73 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { TypewriterText } from './TypewriterText';
 
 export const Hero: React.FC = () => {
+  const heroRef = useRef<HTMLElement | null>(null);
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
+
+  // Pause typing animation if hero is scrolled offscreen
+  useEffect(() => {
+    if (!heroRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsHeroVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(heroRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="w-full pt-20 pb-6 sm:pt-24 sm:pb-10 bg-white">
+    <section
+      id="top"
+      ref={heroRef}
+      className="w-full pt-28 sm:pt-36 lg:pt-40 pb-8 sm:pb-12 bg-[#FCFBF9]"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-        {/* Main Hero Showcase Card */}
-        <div className="relative w-full rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-100 bg-neutral-900 aspect-[4/3] sm:aspect-[16/10] lg:aspect-[2.1/1] min-h-[460px] sm:min-h-[520px]">
-          {/* Background Image */}
+        {/* Editorial Heading Area above the photograph */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-end mb-8 sm:mb-10 lg:mb-12">
+          {/* Large headline on the left */}
+          <div className="lg:col-span-7 xl:col-span-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.4rem] xl:text-[3.75rem] font-extrabold text-[#111827] tracking-tight leading-[1.12]">
+              <span className="sr-only">Dream local. Build something big.</span>
+              <span aria-hidden="true">
+                <span className="block text-[#111827]">Dream local.</span>
+                <span className="inline-block text-[#111827]">Build </span>{' '}
+                <TypewriterText phrase="something big." isVisible={isHeroVisible} />
+              </span>
+            </h1>
+          </div>
+
+          {/* Supporting introduction on the right, aligned near lower portion */}
+          <div className="lg:col-span-5 xl:col-span-4 lg:pb-3">
+            <p className="text-base sm:text-lg text-[#4B5563] leading-relaxed font-normal">
+              Connect with entrepreneurs, find guidance, and take your next step in business.
+            </p>
+          </div>
+        </div>
+
+        {/* Hero Photograph with Inset CTA Panel */}
+        <div className="relative w-full rounded-[24px] sm:rounded-[32px] lg:rounded-[36px] overflow-hidden border border-gray-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] bg-gray-100">
           <img
             src="/assets/hero-workshop.jpg"
             alt="Dynamic Maharashtra entrepreneurs collaborating at their workshop table"
-            className="w-full h-full object-cover object-center brightness-[0.95]"
+            className="w-full h-[320px] sm:h-[400px] lg:h-[460px] object-cover object-[center_35%]"
+            width={1280}
+            height={460}
+            loading="eager"
           />
 
-          {/* Dark Gradient Overlay for optimal contrast */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-black/20 pointer-events-none" />
-
-          {/* Bottom Left: Tagline */}
-          <div className="absolute bottom-6 left-6 sm:bottom-10 sm:left-10 z-10 max-w-[60%] sm:max-w-none">
-            <p className="text-white text-xs sm:text-sm md:text-base font-extrabold tracking-[0.25em] uppercase drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
-              DREAM LOCAL. BUILD SOMETHING BIG.
-            </p>
-          </div>
-
-          {/* Bottom Right: Cutout Card (Exact replication from visual screenshot) */}
-          <div className="absolute bottom-0 right-0 z-20 bg-white pt-5 pl-5 pr-5 pb-5 sm:pt-7 sm:pl-8 sm:pr-8 sm:pb-7 rounded-tl-[2rem] sm:rounded-tl-[2.5rem] max-w-[85%] sm:max-w-md shadow-[-8px_-8px_24px_rgba(0,0,0,0.12)]">
-            <h2 className="text-lg sm:text-2xl md:text-[1.625rem] font-extrabold text-[#111827] leading-tight tracking-tight mb-4">
+          {/* Inset White CTA Panel (Curved Top-Left Edge) */}
+          <div className="sm:absolute sm:bottom-0 sm:right-0 z-10 bg-white sm:rounded-tl-[2rem] lg:rounded-tl-[2.5rem] p-6 sm:p-7 lg:p-8 sm:max-w-[380px] lg:max-w-[420px] shadow-sm">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-[#111827] leading-snug tracking-tight mb-4">
               Your next chapter starts with your own business.
             </h2>
             <div>
               <a
                 href="#contact"
-                className="inline-flex items-center gap-2 bg-[#1F2937] hover:bg-[#E27500] text-white px-5 py-2.5 sm:px-6 sm:py-3 rounded-full text-xs sm:text-sm font-semibold tracking-wide transition-colors duration-200 shadow-sm group"
+                className="inline-flex items-center gap-2 bg-[#E27500] hover:bg-[#CC6600] active:bg-[#B35500] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-bold tracking-wide transition-colors duration-200 shadow-sm group"
               >
                 <span>Start your journey</span>
                 <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -41,7 +76,7 @@ export const Hero: React.FC = () => {
           </div>
         </div>
 
-        {/* Four-Pillar Divider Bar (Matches reference screenshot) */}
+        {/* Four-Pillar Divider Bar */}
         <div className="mt-8 pt-5 pb-5 border-b border-[#E5E7EB]">
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 md:gap-10 text-[11px] sm:text-xs font-bold tracking-[0.22em] text-[#4B5563] uppercase text-center">
             <span className="hover:text-[#E27500] transition-colors cursor-default">MENTORSHIP</span>
@@ -54,7 +89,7 @@ export const Hero: React.FC = () => {
           </div>
         </div>
 
-        {/* Verified Movement Introduction (Tracker Item 03-02, Submitted Copy) */}
+        {/* Verified Movement Introduction */}
         <div className="mt-8 max-w-4xl mx-auto text-center px-4">
           <p className="text-sm sm:text-base text-[#4B5563] leading-relaxed font-normal">
             <strong className="text-[#1F2937] font-semibold">Mi Udyojak Honarach</strong> inspires young people and aspiring entrepreneurs to develop confidence, determination and an entrepreneurial mindset. Through guidance from experienced business leaders, practical learning and meaningful connections, the platform helps participants take informed steps towards building their businesses.
@@ -64,3 +99,5 @@ export const Hero: React.FC = () => {
     </section>
   );
 };
+
+export default Hero;

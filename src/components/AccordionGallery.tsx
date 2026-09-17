@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { gsap } from 'gsap';
-import { Award, ArrowRight } from 'lucide-react';
+import { Award } from 'lucide-react';
 import './AccordionGallery.css';
 
 export interface MentorGalleryItem {
@@ -123,18 +123,6 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
     }
   };
 
-  const handleCtaClick = (e: React.MouseEvent, href?: string) => {
-    e.stopPropagation();
-    if (href) {
-      const targetId = href.replace('#', '');
-      const el = document.getElementById(targetId);
-      if (el) {
-        e.preventDefault();
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-  };
-
   return (
     <div className="accordion-gallery-wrapper">
       <div
@@ -216,17 +204,6 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
                   {item.description}
                 </p>
 
-                {/* Dedicated Interactive CTA Button */}
-                <div className="ag-panel__action">
-                  <a
-                    href={item.link || '#contact'}
-                    onClick={(e) => handleCtaClick(e, item.link || '#contact')}
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FFB783] bg-white/10 hover:bg-[#E27500] hover:text-white px-3.5 py-1.5 rounded-full transition-colors pointer-events-auto cursor-pointer"
-                  >
-                    <span>Connect with Mentor</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
               </div>
             </div>
           );

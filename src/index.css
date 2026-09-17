@@ -76,10 +76,9 @@
 }
 
 /* ═══════════════════════════════════════════════════
-   iOS 26 LIQUID GLASS PILL NAVBAR (RESPONSIVE)
+   CLEAN SOLID PILL NAVBAR (RESPONSIVE)
    • Dynamic Island expansion on mobile (<640px)
    • Full smooth pill morph on tablet & desktop (≥640px)
-   • Hardware-accelerated liquid glass refraction
    • Safe-area inset aware on iOS devices
    ═══════════════════════════════════════════════════ */
 
@@ -91,29 +90,17 @@
   max-width: calc(100vw - 1rem);
   box-sizing: border-box;
 
-  /* Liquid glass */
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.72) 0%,
-      rgba(255, 255, 255, 0.38) 40%,
-      rgba(255, 255, 255, 0.52) 60%,
-      rgba(255, 255, 255, 0.72) 100%
-    );
-  backdrop-filter: blur(32px) saturate(1.9) brightness(1.06);
-  -webkit-backdrop-filter: blur(32px) saturate(1.9) brightness(1.06);
+  /* Solid clean background - glassmorphism removed */
+  background: #FFFFFF;
 
   /* Pill shape */
   border-radius: 9999px;
 
-  /* Apple specular double-border illusion */
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  /* Clean solid border and elevated shadow */
+  border: 1px solid #E5E7EB;
   box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.04),
-    0 2px 6px rgba(0, 0, 0, 0.05),
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    inset 0 1.5px 0 rgba(255, 255, 255, 0.85),
-    inset 0 -0.5px 0 rgba(0, 0, 0, 0.03);
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 10px 25px -3px rgba(0, 0, 0, 0.1);
 
   /* Smooth morph transitions */
   transition:
@@ -133,43 +120,15 @@
   0% {
     transform: translateX(-50%) translateY(60px) scale(0.9);
     opacity: 0;
-    filter: blur(6px);
   }
   60% {
     transform: translateX(-50%) translateY(-3px) scale(1.01);
     opacity: 1;
-    filter: blur(0);
   }
   100% {
     transform: translateX(-50%) translateY(0) scale(1);
     opacity: 1;
   }
-}
-
-/* ─── Top specular glow sweep ─── */
-.ios-dock__glow {
-  position: absolute;
-  top: 0;
-  left: 12%;
-  right: 12%;
-  height: 1px;
-  border-radius: 9999px;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.95) 30%,
-    rgba(255, 255, 255, 0.35) 50%,
-    rgba(255, 255, 255, 0.95) 70%,
-    transparent 100%
-  );
-  background-size: 200% 100%;
-  animation: glow-sweep 6s ease-in-out infinite;
-}
-
-@keyframes glow-sweep {
-  0%, 100% { background-position: 200% 0; }
-  50% { background-position: -100% 0; }
 }
 
 /* ─── Items container ─── */
@@ -196,7 +155,7 @@
   border-radius: 9999px;
   text-decoration: none;
   cursor: pointer;
-  color: rgba(60, 60, 67, 0.7);
+  color: #4B5563;
   border: 1px solid transparent;
   overflow: hidden;
   white-space: nowrap;
@@ -219,38 +178,25 @@
 }
 
 .ios-dock__item:hover {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(255, 255, 255, 0.6);
+  background: #F3F4F6;
+  border-color: #E5E7EB;
   color: #E27500;
-  box-shadow:
-    0 1px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* ─── Active state — Saffron liquid glass ─── */
+/* ─── Active state ─── */
 .ios-dock__item--active {
-  background: linear-gradient(
-    135deg,
-    rgba(226, 117, 0, 0.12) 0%,
-    rgba(226, 117, 0, 0.20) 100%
-  );
-  border-color: rgba(226, 117, 0, 0.26);
+  background: #FFF7ED;
+  border-color: #FED7AA;
   color: #E27500;
-  box-shadow:
-    0 1px 10px rgba(226, 117, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 4px rgba(226, 117, 0, 0.12);
 }
 
 .ios-dock__item--active:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(226, 117, 0, 0.18) 0%,
-    rgba(226, 117, 0, 0.28) 100%
-  );
-  border-color: rgba(226, 117, 0, 0.35);
-  box-shadow:
-    0 2px 16px rgba(226, 117, 0, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background: #FFEDD5;
+  border-color: #FDBA74;
+  color: #C2410C;
+  box-shadow: 0 2px 6px rgba(226, 117, 0, 0.16);
 }
 
 /* ─── Icon ─── */
@@ -379,10 +325,8 @@
     bottom: max(0.75rem, calc(0.35rem + env(safe-area-inset-bottom, 0px)));
     padding: 0.25rem 0.35rem;
     box-shadow:
-      0 0 0 0.5px rgba(0, 0, 0, 0.04),
-      0 4px 16px rgba(0, 0, 0, 0.09),
-      0 8px 28px rgba(0, 0, 0, 0.07),
-      inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      0 4px 6px -1px rgba(0, 0, 0, 0.06),
+      0 10px 20px -3px rgba(0, 0, 0, 0.1);
   }
 
   .ios-dock__icon {
