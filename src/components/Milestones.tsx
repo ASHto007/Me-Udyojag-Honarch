@@ -1,43 +1,14 @@
+import { APPROVED_MILESTONES } from '../data/approvedContent';
+import { SectionBackdrop } from './SectionBackdrop';
 import React from 'react';
 import { Calendar } from 'lucide-react';
 
 export const Milestones: React.FC = () => {
-  // 5 verified timeline points per item 04-03 (Submitted)
-  const timeline = [
-    {
-      period: '~17 Years Ago',
-      title: 'Movement Inception',
-      desc: 'Grassroots entrepreneurship guidance initiative founded by Nilesh More, addressing the lack of structured business mentorship in regional communities.',
-      badge: 'Client-reported (item 04-03)',
-    },
-    {
-      period: '15 Oct 2018',
-      title: 'Global Maharashtrian Entrepreneurship Conclave',
-      desc: 'Held at the iconic Hotel Taj Mahal Palace, Mumbai, bringing together prominent business personalities and emerging industrialists.',
-      badge: 'Documented Landmark',
-    },
-    {
-      period: '2020',
-      title: 'Youth Guidance & Awards Programme',
-      desc: 'Statewide awards and orientation series covered by regional press, honoring youth resilience and enterprise creation.',
-      badge: 'Press-Documented',
-    },
-    {
-      period: 'Ongoing',
-      title: 'Statewide Participant Milestones',
-      desc: 'Over 25,000 direct seminar participants, 185+ educational sessions (60+ auditoriums, 100+ hotels, 25+ colleges), and 2.5M+ digital impressions.',
-      badge: 'Client-reported figures',
-    },
-    {
-      period: '27 Oct 2026',
-      title: 'Global Marathi Entrepreneurship Expo',
-      desc: 'Historic gathering of 100+ Marathi entrepreneurs with crore-scale operations at the National Stock Exchange of India (NSE), Mumbai.',
-      badge: 'Confirmed Upcoming Expo',
-    },
-  ];
+  const timeline = APPROVED_MILESTONES;
 
   return (
-    <section id="achievements" className="w-full py-20 bg-[#1B2A3A] text-white border-b border-[#0F172A] relative overflow-hidden">
+    <section id="achievements" className="section-with-backdrop section-with-backdrop--dark w-full py-20 bg-[#1B2A3A] text-white border-b border-[#0F172A] relative overflow-hidden">
+      <SectionBackdrop label="MILESTONES" />
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[#E27500]/5 rounded-full blur-[140px] pointer-events-none" />
 
@@ -49,14 +20,15 @@ export const Milestones: React.FC = () => {
             Milestones of a Grassroots Journey
           </h2>
           <p className="text-sm sm:text-base text-gray-300 mt-2">
-            Key verifiable dates and historical turning points in building an entrepreneurial mindset across Maharashtra.
+            The journey of Mi Udyojak Honarach.
           </p>
         </div>
 
         {/* Horizontally Centered Timeline */}
         <div className="relative max-w-5xl mx-auto">
+          {!timeline.length && <p className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-sm text-gray-300">Movement milestones will be published here once confirmed.</p>}
           {/* Spine vertical line: center on desktop (md), left-aligned on mobile */}
-          <div className="absolute top-4 bottom-4 left-4 md:left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b from-[#E27500] via-[#E27500]/40 to-[#E27500]/10 pointer-events-none" />
+          {timeline.length > 0 && <div className="absolute top-4 bottom-4 left-4 md:left-1/2 -translate-x-1/2 w-0.5 bg-gradient-to-b from-[#E27500] via-[#E27500]/40 to-[#E27500]/10 pointer-events-none" />}
 
           {/* Timeline Cards Container */}
           <div className="space-y-8 md:space-y-12">

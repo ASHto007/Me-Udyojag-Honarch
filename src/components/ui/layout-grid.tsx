@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import React, { useState, useId } from "react";
+import { motion } from "motion/react";
+import { Modal } from "./Modal";
 import { X } from "lucide-react";
 
 // Inline cn utility
@@ -8,9 +9,12 @@ function cn(...inputs: (string | undefined | null | false)[]) {
   return inputs.filter(Boolean).join(" ");
 }
 
-type Card = {
+export type Card = {
   id: number;
-  content: JSX.Element | React.ReactNode | string;
+  num?: string;
+  title?: string;
+  marathiTitle?: string;
+  content: React.ReactNode;
   className: string;
   thumbnail: string;
 };
@@ -19,119 +23,111 @@ const SPRING = { type: "spring", stiffness: 320, damping: 30, mass: 0.8 } as con
 
 export const LayoutGrid = ({ cards = [] }: { cards: Card[] }) => {
   const [selected, setSelected] = useState<Card | null>(null);
-
-  // Lock body scroll when a card is open
-  useEffect(() => {
-    document.body.style.overflow = selected ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [selected]);
-
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSelected(null);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+  const titleId = useId();
+  const handleCardClick = (card: Card) => setSelected(card);
 
   return (
     <>
       {/* ── Grid ─────────────────────────────────────────────── */}
       <div
-        className="w-full p-4 sm:p-6 grid grid-cols-1 md:grid-cols-3 max-w-7xl mx-auto gap-3 sm:gap-4"
-        style={{ gridAutoRows: "220px" }}
+        className="w-full p-2 sm:p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 max-w-7xl mx-auto gap-4 sm:gap-5"
+        style={{ gridAutoRows: "230px" }}
       >
         {cards.map((card) => (
-          <div key={card.id} className={cn(card.className, "min-h-[220px]")}>
-            <motion.div
+          <div key={card.id} className={cn(card.className, "min-h-[230px]")}>
+            <motion.button
+              type="button"
               layoutId={`card-${card.id}`}
-              onClick={() => setSelected(card)}
+              onClick={() => handleCardClick(card)}
               transition={SPRING}
-              className="relative w-full h-full rounded-2xl overflow-hidden cursor-pointer group"
+              className="relative w-full h-full rounded-2xl sm:rounded-3xl overflow-hidden cursor-pointer group text-left p-0 border border-gray-200/90 shadow-sm hover:shadow-md hover:border-[#E27500]/60 focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#E27500] focus-visible:ring-offset-2 block bg-gray-900 transition-all duration-300"
               style={{ willChange: "transform" }}
+              aria-haspopup="dialog"
+              aria-expanded={selected?.id === card.id}
+              aria-label={`Service ${card.num || card.id}: ${card.title || 'Explore service details'}`}
             >
-              {/* Image */}
+              {/* Background Photograph */}
               <motion.img
                 layoutId={`img-${card.id}`}
                 src={card.thumbnail}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-center"
+                alt={card.title || "Service illustration"}
+                className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
                 transition={SPRING}
               />
 
-              {/* Hover overlay with content hint */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                <span className="text-xs font-bold text-white/90 uppercase tracking-widest">
-                  Click to explore →
+              {/* Restrained theme-colored gradient for permanent legibility without requiring hover */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0B1320] via-[#0B1320]/60 to-black/20 pointer-events-none" />
+
+              {/* Permanent Header Badge */}
+              <div className="absolute top-3.5 left-3.5 sm:top-4 sm:left-4 z-10">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#E27500] text-white shadow-xs">
+                  Service {card.num || `0${card.id}`}
                 </span>
               </div>
-            </motion.div>
+
+              {/* Permanent Bottom Caption Area */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10 flex flex-col justify-end text-white pointer-events-none">
+                {card.marathiTitle && (
+                  <span className="text-[11px] sm:text-xs font-marathi text-[#FFB783] font-semibold mb-1 drop-shadow-xs line-clamp-1">
+                    {card.marathiTitle}
+                  </span>
+                )}
+                <h3 className="text-base sm:text-lg font-extrabold text-white leading-snug drop-shadow-sm line-clamp-2">
+                  {card.title}
+                </h3>
+              </div>
+            </motion.button>
           </div>
         ))}
       </div>
 
-      {/* ── Lightbox Modal ───────────────────────────────────── */}
-      <AnimatePresence>
-        {selected && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
-              onClick={() => setSelected(null)}
-            />
-
-            {/* Expanded card — flies from grid position to centre */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 pointer-events-none">
+      {/* ── Accessible Detail Lightbox Modal ──────────────────── */}
+      {selected && (
+        <Modal onClose={() => setSelected(null)} labelledBy={titleId}
+          className="bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 lg:p-8">
+          <h2 id={titleId} className="sr-only">{selected.title || 'Service Details'}</h2>
               <motion.div
                 layoutId={`card-${selected.id}`}
                 transition={SPRING}
-                className="relative w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl pointer-events-auto"
+                className="relative w-full max-w-2xl rounded-3xl overflow-y-auto shadow-2xl pointer-events-auto bg-[#111827] border border-white/15 max-h-[90dvh] flex flex-col"
                 style={{ willChange: "transform" }}
+                onClick={(e) => e.stopPropagation()}
               >
-                {/* Expanded image */}
-                <motion.img
-                  layoutId={`img-${selected.id}`}
-                  src={selected.thumbnail}
-                  alt=""
-                  className="w-full h-64 sm:h-80 object-cover object-center"
-                  transition={SPRING}
-                />
+                {/* Expanded Image */}
+                <div className="relative w-full h-[min(14rem,30dvh)] sm:h-[min(18rem,35dvh)] shrink-0 overflow-hidden bg-black">
+                  <motion.img
+                    layoutId={`img-${selected.id}`}
+                    src={selected.thumbnail}
+                    alt={selected.title || ""}
+                    className="w-full h-full object-cover object-center"
+                    transition={SPRING}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-transparent pointer-events-none" />
+                  
+                  {/* Close button with focus visible */}
+                  <button
+                    type="button"
+                    onClick={() => setSelected(null)}
+                    aria-label="Close dialog"
+                    className="absolute top-4 right-4 p-2.5 rounded-full bg-black/70 hover:bg-[#E27500] text-white backdrop-blur-md transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E27500]"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
 
-                {/* Content panel slides up */}
+                {/* Content Panel */}
                 <motion.div
-                  initial={{ opacity: 0, y: 24 }}
+                  initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 16 }}
-                  transition={{ duration: 0.28, ease: "easeOut", delay: 0.08 }}
-                  className="bg-[#111827] px-7 py-6"
+                  exit={{ opacity: 0, y: 12 }}
+                  transition={{ duration: 0.22, ease: "easeOut" }}
+                  className="px-6 sm:px-8 py-6" onClick={(event) => { if ((event.target as HTMLElement).closest('a[href^="#"]')) setSelected(null); }}
                 >
                   {selected.content}
                 </motion.div>
-
-                {/* Close button */}
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.2, delay: 0.1 }}
-                  onClick={() => setSelected(null)}
-                  aria-label="Close"
-                  className="absolute top-3 right-3 p-2 rounded-full bg-black/60 hover:bg-[#E27500] text-white backdrop-blur-md transition-colors cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </motion.button>
               </motion.div>
-            </div>
-          </>
-        )}
-      </AnimatePresence>
+        </Modal>
+      )}
     </>
   );
 };

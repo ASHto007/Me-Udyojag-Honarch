@@ -5,6 +5,8 @@ import './AccordionGallery.css';
 
 export interface MentorGalleryItem {
   image: string;
+  imagePosition?: string;
+  imageShiftUp?: number;
   name: string;
   role: string;
   tag: string;
@@ -164,6 +166,11 @@ export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
                   <img
                     src={item.image}
                     alt={item.alt || item.name}
+                    style={{
+                      objectPosition: item.imagePosition ?? 'center center',
+                      height: item.imageShiftUp ? `calc(100% + ${item.imageShiftUp}px)` : undefined,
+                      transform: item.imageShiftUp ? `translateY(-${item.imageShiftUp}px)` : undefined,
+                    }}
                     draggable="false"
                     loading="eager"
                   />

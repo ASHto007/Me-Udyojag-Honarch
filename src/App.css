@@ -10,3 +10,68 @@ img, svg {
 button {
   cursor: pointer;
 }
+
+/* Oversized editorial lettering behind each section's content. */
+.section-with-backdrop {
+  position: relative;
+  isolation: isolate;
+}
+
+.section-backdrop {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: clamp(10rem, 23vw, 23rem);
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  color: rgb(112 83 60 / 4%);
+}
+
+.section-backdrop span {
+  position: absolute;
+  top: clamp(1.5rem, 3vw, 3rem);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: clamp(5.5rem, 18vw, 20rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.section-with-backdrop--dark .section-backdrop {
+  color: rgb(255 255 255 / 4%);
+}
+
+html { scrollbar-gutter: stable; }
+.shared-dialog {
+  position: fixed;
+  inset: 0;
+  margin: 0;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  border: 0;
+  color: inherit;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.shared-dialog:not([open]) { display: none; }
+.shared-dialog::backdrop { background: transparent; }
+.shared-dialog > :not(.sr-only) { max-height: calc(var(--dialog-height, 100dvh) - 2rem); }
+.shared-dialog :focus-visible { outline: 2px solid #E27500; outline-offset: 3px; }
+.shared-dialog button[aria-label^="Close"] { min-width: 44px; min-height: 44px; }
+.shared-dialog input, .shared-dialog textarea, .shared-dialog select { scroll-margin-block: 1rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

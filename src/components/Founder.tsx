@@ -1,9 +1,11 @@
+import { SectionBackdrop } from './SectionBackdrop';
 import React from 'react';
 import { Quote } from 'lucide-react';
 
 export const Founder: React.FC = () => {
   return (
-    <section id="founder-vision" className="w-full py-16 sm:py-24 bg-[#080E18] border-b border-[#1a2540]">
+    <section id="founder-vision" className="section-with-backdrop section-with-backdrop--dark w-full py-16 sm:py-24 bg-[#080E18] border-b border-[#1a2540]">
+      <SectionBackdrop label="VISION" />
       <div id="about" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         
         {/* Center-aligned Section Heading */}

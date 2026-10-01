@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only trusted server code and the email extension access these collections.
+    match /enquiries/{id} { allow read, write: if false; }
+    match /mail/{id} { allow read, write: if false; }
+    match /submissionLimits/{id} { allow read, write: if false; }
+    // Close the former direct browser submission route.
+    match /contactEnquiries/{id} { allow read, write: if false; }
+  }
+}

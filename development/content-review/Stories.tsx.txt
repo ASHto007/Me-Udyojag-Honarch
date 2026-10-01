@@ -1,0 +1,86 @@
+import { SectionBackdrop } from './SectionBackdrop';
+import React from 'react';
+import { UserCheck, Sparkles, BookOpen } from 'lucide-react';
+
+export const Stories: React.FC = () => {
+  return (
+    <section id="stories" className="section-with-backdrop w-full py-16 sm:py-24 bg-white border-b border-[#EAEAEA]">
+      <SectionBackdrop label="STORIES" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        
+        {/* Header */}
+        <div className="flex flex-col items-center text-center mb-12 max-w-3xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-[#111827] tracking-tight">
+            Success Stories &amp; Founder Journeys
+          </h2>
+          <p className="text-sm sm:text-base text-[#6D6D6D] mt-2">
+            Real-world accounts of Maharashtra founders who started with an ambition and built resilient enterprises with community guidance.
+          </p>
+        </div>
+
+        {/* Honest, Concise Curated Empty State Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            {
+              title: 'Manufacturing & Workshop Creators',
+              desc: 'Case studies of first-generation machine shop owners and engineering micro-enterprises across regional clusters.',
+            },
+            {
+              title: 'Agro-Processing & Rural MSMEs',
+              desc: 'Field profiles of value-added agricultural ventures and domestic processing units achieving direct market access.',
+            },
+            {
+              title: 'Consumer Retail & Service Ventures',
+              desc: 'Growth trajectories of emerging local brands expanding distribution and retail footprints throughout Maharashtra.',
+            },
+          ].map((category, idx) => (
+            <div
+              key={idx}
+              className="bg-[#FCFBF9] rounded-2xl border border-[#EAEAEA] p-6 sm:p-8 flex flex-col justify-between min-h-[280px] text-center shadow-xs"
+            >
+              <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200/70 flex items-center justify-center text-[#E27500] mx-auto mb-4">
+                <Sparkles className="w-6 h-6" />
+              </div>
+
+              <div>
+                <h3 className="text-base font-bold text-[#1F2937] mb-2">
+                  {category.title}
+                </h3>
+                <p className="text-xs text-[#6D6D6D] leading-relaxed mb-4 max-w-xs mx-auto">
+                  {category.desc}
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-gray-100 text-[11px] font-medium text-[#E27500] inline-flex items-center justify-center gap-1.5">
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Profiles Currently in Curation</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Invitation to Share Story */}
+        <div className="mt-10 p-6 rounded-2xl bg-[#FCFBF9] border border-[#EAEAEA] flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#FEF3C7] text-[#E27500] flex items-center justify-center shrink-0">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-[#111827]">Are you an entrepreneur from our movement?</h4>
+              <p className="text-xs text-[#6D6D6D]">Submit your venture story to be published and featured across our statewide platforms.</p>
+            </div>
+          </div>
+          <a
+            href="#contact"
+            className="bg-[#1F2937] hover:bg-[#E27500] text-white px-5 py-2.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors"
+          >
+            Submit Your Story
+          </a>
+        </div>
+
+      </div>
+    </section>
+  );
+};
+
+export default Stories;

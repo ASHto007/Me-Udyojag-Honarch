@@ -149,9 +149,11 @@
 /* ─── Individual dock item ─── */
 .ios-dock__item {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
   border-radius: 9999px;
   text-decoration: none;
   cursor: pointer;
@@ -173,6 +175,12 @@
     transform 0.15s ease;
 }
 
+.ios-dock__item:focus-visible {
+  outline: none;
+  border-color: #E27500;
+  box-shadow: 0 0 0 2px rgba(226, 117, 0, 0.4);
+}
+
 .ios-dock__item:active {
   transform: scale(0.94);
 }
@@ -182,6 +190,15 @@
   border-color: #E5E7EB;
   color: #E27500;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Hover and focus expansion in collapsed mode */
+.ios-dock--collapsed .ios-dock__item:hover .ios-dock__label,
+.ios-dock--collapsed .ios-dock__item:focus-visible .ios-dock__label {
+  max-width: 5rem;
+  opacity: 1;
+  transform: translateX(0);
+  margin-left: 0.35rem;
 }
 
 /* ─── Active state ─── */

@@ -1,3 +1,4 @@
+import { SectionBackdrop } from './SectionBackdrop';
 import React from 'react';
 import './AboutCompany.css';
 import { TiltedCard } from './motion/TiltedCard';
@@ -16,22 +17,22 @@ export const AboutCompany: React.FC = () => {
       icon: Users,
       marathiTitle: 'अनुभवी मार्गदर्शकांचे नेटवर्क',
       title: 'Mentor & Industry Ecosystem',
-      desc: 'Direct access to 450+ seasoned business leaders, industry titans, and domain veterans for real-world guidance.',
-      highlight: '450+ Mentors'
+      desc: 'Learn directly from seasoned industry veterans and business experts across operations, compliance, and growth.',
+      highlight: 'Mentorship & Guidance'
     },
     {
       icon: TrendingUp,
       marathiTitle: 'प्रकल्प व वित्त सहाय्यता',
       title: 'Project Finance & MSME Handholding',
       desc: 'Step-by-step assistance with business plan formulation, government subsidies, loan facilitation, and regulatory compliance.',
-      highlight: '₹150 Cr+ Impact'
+      highlight: 'Business Guidance'
     },
     {
       icon: Building2,
       marathiTitle: 'बाजारपेठ आणि व्यावसायिक सहकार्य',
       title: 'Market Linkages & B2B Growth',
       desc: 'Connecting regional manufacturers and service providers with statewide trade channels, corporate supply chains, and B2B buyers.',
-      highlight: '36 Districts'
+      highlight: 'Business Connections'
     },
   ];
 
@@ -59,7 +60,8 @@ export const AboutCompany: React.FC = () => {
   ];
 
   return (
-    <section id="about-company" className="w-full py-16 sm:py-24 bg-white border-b border-[#EAEAEA] relative overflow-hidden">
+    <section id="about-company" className="section-with-backdrop w-full py-16 sm:py-24 bg-white border-b border-[#EAEAEA] relative overflow-hidden">
+      <SectionBackdrop label="ABOUT US" />
       {/* Decorative subtle background accents */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#E27500]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#111827]/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
@@ -116,7 +118,7 @@ export const AboutCompany: React.FC = () => {
             </p>
             <div className="mt-6 pt-6 border-t border-white/10 flex items-center gap-3 text-xs font-medium text-gray-400">
               <Award className="w-4 h-4 text-[#FFB783]" />
-              <span>Inspiring economic leadership across all 36 districts</span>
+              <span>Inspiring economic leadership across Maharashtra</span>
             </div>
           </div>
 

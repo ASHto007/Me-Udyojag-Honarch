@@ -25,14 +25,8 @@ export const Footer: React.FC = () => {
             </div>
 
             <p className="text-xs text-gray-400 leading-relaxed max-w-sm">
-              An entrepreneurial guidance initiative founded by Nilesh More, inspiring young people and aspiring founders to develop confidence, determination, and enterprise acumen across Maharashtra.
+              An entrepreneurial guidance movement founded by Nilesh More, inspiring aspiring founders to develop confidence, determination, and enterprise acumen across Maharashtra.
             </p>
-
-            <div className="pt-2">
-              <span className="text-[11px] text-gray-400 italic">
-                Working Translation Tagline: "I Will Become an Entrepreneur"
-              </span>
-            </div>
           </div>
 
           {/* Nav Anchors */}
@@ -44,7 +38,7 @@ export const Footer: React.FC = () => {
               <li><a href="#founder-vision" className="hover:text-[#E27500] transition-colors">About Nilesh More</a></li>
               <li><a href="#programs" className="hover:text-[#E27500] transition-colors">5 Core Services</a></li>
               <li><a href="#achievements" className="hover:text-[#E27500] transition-colors">Milestones</a></li>
-              <li><a href="#community" className="hover:text-[#E27500] transition-colors">NSE Expo 2026</a></li>
+              <li><a href="#community" className="hover:text-[#E27500] transition-colors">Events</a></li>
               <li><a href="#stories" className="hover:text-[#E27500] transition-colors">Success Stories</a></li>
               <li><a href="#mentors" className="hover:text-[#E27500] transition-colors">Mentors</a></li>
               <li><a href="#gallery" className="hover:text-[#E27500] transition-colors">Moments Gallery</a></li>
@@ -60,25 +54,27 @@ export const Footer: React.FC = () => {
               <li>• Practical Business Guidance</li>
               <li>• State-Level Networking Forums</li>
               <li>• Grassroots MSME Enablement</li>
-              <li>• Recognition & Industry Felicitations</li>
+              <li>• Recognition &amp; Industry Felicitations</li>
               <li>• Inter-Enterprise Collaborations</li>
             </ul>
           </div>
 
-          {/* Public Inquiries & Social */}
+          {/* Public Inquiries & Communication */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#FFB783]">
-              Contact Desk
+              Inquiries &amp; Engagement
             </h4>
-            <div className="space-y-2">
-              <div className="pending-placeholder text-[10px] w-full">
-                [PENDING CLIENT INPUT — public email, item 09-12]
-              </div>
-              <div className="pending-placeholder text-[10px] w-full">
-                [PENDING CLIENT INPUT — official helpline, item 09-13]
-              </div>
-              <div className="pending-placeholder text-[10px] w-full">
-                [PENDING CLIENT INPUT — verified social profiles]
+            <div className="space-y-2 text-xs text-gray-300">
+              <p className="leading-relaxed text-gray-400">
+                Visit the Contact section for enquiry options and form availability.
+              </p>
+              <div className="pt-1">
+                <a
+                  href="#contact"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#FFB783] hover:text-white transition-colors"
+                >
+                  <span>Go to Registration Desk →</span>
+                </a>
               </div>
             </div>
           </div>
@@ -87,11 +83,11 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-          <p>© 2026 Mi Udyojak Honarach. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Mi Udyojak Honarach. All rights reserved.</p>
           <div className="flex items-center gap-4 text-[11px]">
-            <span>Content Compliance Master Audit Applied</span>
+            <span>Maharashtra Grassroots Entrepreneurship Movement</span>
             <span>•</span>
-            <a href="#contact" className="hover:text-white transition-colors">Join Us</a>
+            <a href="#contact" className="hover:text-white transition-colors">Join the Movement</a>
           </div>
         </div>
 
@@ -99,3 +95,5 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+
+export default Footer;

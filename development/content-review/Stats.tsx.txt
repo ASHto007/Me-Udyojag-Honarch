@@ -1,0 +1,103 @@
+import { SectionBackdrop } from './SectionBackdrop';
+import React from 'react';
+import { Users, BookOpen, IndianRupee, Award } from 'lucide-react';
+import CountUp from './ui/count-up';
+
+export const Stats: React.FC = () => {
+  // Movement metrics reflecting client-supplied grassroots reach
+  const displayStats = [
+    {
+      id: 'participants',
+      prefix: '',
+      from: 24500,
+      value: 25000,
+      suffix: '+',
+      separator: ',',
+      duration: 0.15,
+      label: 'Seminar Participants',
+      sublabel: 'Direct attendees guided across 185+ educational sessions',
+      icon: Users,
+    },
+    {
+      id: 'districts',
+      prefix: '',
+      from: 0,
+      value: 36,
+      suffix: '',
+      separator: '',
+      duration: 0.2,
+      label: 'Districts of Maharashtra',
+      sublabel: 'Active outreach and chapters across the entire state',
+      icon: BookOpen,
+    },
+    {
+      id: 'capital',
+      prefix: '₹',
+      from: 0,
+      value: 150,
+      suffix: ' Cr+',
+      separator: '',
+      duration: 0.2,
+      label: 'Cumulative Capital & Value',
+      sublabel: 'Estimated business volume and credit enabled in network',
+      icon: IndianRupee,
+    },
+    {
+      id: 'mentors',
+      prefix: '',
+      from: 0,
+      value: 450,
+      suffix: '+',
+      separator: '',
+      duration: 0.2,
+      label: 'Mentors & Industry Titans',
+      sublabel: 'Experienced business leaders providing sector guidance',
+      icon: Award,
+    },
+  ];
+
+  return (
+    <section id="stats" className="section-with-backdrop w-full py-12 bg-[#F9F9FB] border-b border-[#EAEAEA]">
+      <SectionBackdrop label="IMPACT" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        {/* 4 Stat Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {displayStats.map((item) => {
+            const IconComponent = item.icon;
+            return (
+              <div
+                key={item.id}
+                className="bg-white rounded-2xl p-6 shadow-sm border border-[#EAEAEA] hover:border-[#E27500]/40 hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+              >
+                {/* Top Row: Left orange bar + Right icon */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-1.5 h-6 bg-[#E27500] rounded-full" />
+                  <IconComponent className="w-5 h-5 text-[#E27500] stroke-[1.75]" />
+                </div>
+
+                {/* Animated Stat */}
+                <div>
+                  <div className="text-3xl sm:text-[2.25rem] font-extrabold text-[#111827] tracking-tight mb-1 font-sans tabular-nums">
+                    {item.prefix}
+                    <CountUp
+                      from={item.from}
+                      to={item.value}
+                      separator={item.separator}
+                      duration={item.duration}
+                      delay={0}
+                    />
+                    {item.suffix}
+                  </div>
+                  <h4 className="text-sm font-bold text-[#1F2937] mb-1">{item.label}</h4>
+                  <p className="text-xs text-[#6D6D6D] leading-relaxed">{item.sublabel}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Stats;

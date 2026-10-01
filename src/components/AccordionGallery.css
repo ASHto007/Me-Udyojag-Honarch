@@ -67,21 +67,21 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  filter: brightness(0.92);
+  filter: none;
   transition: filter 0.45s ease, transform 0.45s ease;
   will-change: transform, filter;
 }
 
 .ag-panel--active .ag-panel__media {
   filter: brightness(1.0);
-  transform: scale(1.02);
+  transform: none;
 }
 
 .ag-panel__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 20%;
+  object-position: center center;
   display: block;
   user-select: none;
   -webkit-user-drag: none;
@@ -93,8 +93,8 @@
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(11, 19, 32, 0.1) 0%,
-    rgba(11, 19, 32, 0.4) 40%,
+    rgba(11, 19, 32, 0) 0%,
+    rgba(11, 19, 32, 0.08) 45%,
     rgba(11, 19, 32, 0.95) 100%
   );
   transition: background 0.35s ease;
@@ -103,8 +103,8 @@
 .ag-panel--active .ag-panel__overlay {
   background: linear-gradient(
     180deg,
-    rgba(11, 19, 32, 0.05) 0%,
-    rgba(11, 19, 32, 0.3) 35%,
+    rgba(11, 19, 32, 0) 0%,
+    rgba(11, 19, 32, 0.04) 45%,
     rgba(11, 19, 32, 0.94) 100%
   );
 }
@@ -281,7 +281,8 @@
 
   /* All mobile cards always show their bio cleanly without sudden pop-ins */
   .ag-panel .ag-panel__media {
-    filter: grayscale(0.2) brightness(0.9);
+    filter: none;
+    transform: none !important;
   }
 
   .ag-panel--active .ag-panel__media {

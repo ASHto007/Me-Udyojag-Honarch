@@ -1,3 +1,4 @@
+import { SectionBackdrop } from './SectionBackdrop';
 import React from 'react';
 import { Network, Megaphone, GraduationCap, Award, Handshake, ArrowRight } from 'lucide-react';
 import { LayoutGrid } from './ui/layout-grid';
@@ -12,7 +13,7 @@ const ServiceOverlay = ({
   desc,
 }: {
   num: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   marathiTitle: string;
   desc: string;
@@ -49,6 +50,9 @@ const ServiceOverlay = ({
 const cards = [
   {
     id: 1,
+    num: '01',
+    title: 'Networking Events & Forums',
+    marathiTitle: 'व्यावसायिक नेटवर्किंग आणि परिसंवाद',
     className: 'md:col-span-2 md:row-span-2',
     thumbnail:
       'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=900&q=80&fit=crop',
@@ -64,6 +68,9 @@ const cards = [
   },
   {
     id: 2,
+    num: '02',
+    title: 'Business Promotion Platform',
+    marathiTitle: 'व्यवसाय प्रसिद्धी आणि व्यासपीठ',
     className: 'md:col-span-1 md:row-span-1',
     thumbnail:
       'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=600&q=80&fit=crop',
@@ -79,6 +86,9 @@ const cards = [
   },
   {
     id: 3,
+    num: '03',
+    title: 'Mentorship & Guidance',
+    marathiTitle: 'अनुभवी उद्योजकांचे मार्गदर्शन',
     className: 'md:col-span-1 md:row-span-1',
     thumbnail:
       'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&q=80&fit=crop',
@@ -94,6 +104,9 @@ const cards = [
   },
   {
     id: 4,
+    num: '04',
+    title: 'Awards & Recognition',
+    marathiTitle: 'उद्योजक सन्मान आणि पुरस्कार',
     className: 'md:col-span-1 md:row-span-1',
     thumbnail:
       'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=600&q=80&fit=crop',
@@ -109,6 +122,9 @@ const cards = [
   },
   {
     id: 5,
+    num: '05',
+    title: 'Collaborations & Alliances',
+    marathiTitle: 'संस्थात्मक आणि व्यावसायिक सहयोग',
     className: 'md:col-span-2 md:row-span-1',
     thumbnail:
       'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=900&q=80&fit=crop',
@@ -116,7 +132,7 @@ const cards = [
       <ServiceOverlay
         num="05"
         icon={Handshake}
-        title="Collaborations"
+        title="Collaborations & Alliances"
         marathiTitle="संस्थात्मक आणि व्यावसायिक सहयोग"
         desc="Connect entrepreneurs, industry associations, venue partners, and institutional organisations for mutual growth and long-term strategic alliances."
       />
@@ -127,7 +143,8 @@ const cards = [
 /* ─── Section ─── */
 export const Programs: React.FC = () => {
   return (
-    <section id="programs" className="w-full py-16 sm:py-24 bg-[#FCFBF9] border-b border-[#EAEAEA]">
+    <section id="programs" className="section-with-backdrop w-full py-16 sm:py-24 bg-[#FCFBF9] border-b border-[#EAEAEA]">
+      <SectionBackdrop label="PROGRAMS" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
 
         {/* Section Header */}

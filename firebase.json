@@ -1,0 +1,18 @@
+{
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "enquiries",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "test",
+        "*.local",
+        "scripts"
+      ]
+    }
+  ],
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}

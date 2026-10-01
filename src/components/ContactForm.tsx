@@ -1,25 +1,73 @@
-import React, { useState } from 'react';
-import { Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { CONTACT_ENDPOINT } from '../data/submissionConfig';
+import { PREVIEW_MESSAGE, submitEnquiry, type SubmissionResult } from '../services/submissionService';
+import { SectionBackdrop } from './SectionBackdrop';
+import React, { useState, useRef } from 'react';
+import { Send, Info } from 'lucide-react';
 
-export const ContactForm: React.FC = () => {
+export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTACT_ENDPOINT }) => {
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
+    email: '',
     city: '',
-    stage: 'Aspiring Entrepreneur',
-    interest: 'Mentorship & Guidance',
+    stage: 'Aspiring Entrepreneur (Idea Stage)',
+    interest: 'Mentorship & Guidance (Service 03)',
     message: '',
+    consent: false,
   });
 
-  const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState<SubmissionResult | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const pendingRef = useRef(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (pendingRef.current) return;
+    setResult(null);
+    const errors: Record<string, string> = {};
+
+    if (!formData.fullName.trim()) {
+      errors.fullName = 'Full Name is required.';
+    }
+
+    const phoneDigits = formData.phone.replace(/\D/g, '');
+    if (!(phoneDigits.length === 10 || (phoneDigits.length === 12 && phoneDigits.startsWith("91")))) {
+      errors.phone = 'Please enter a valid 10-digit mobile number.';
+    }
+
+
+    const email = formData.email.trim();
+    if (!email) {
+      errors.email = 'Email Address is required.';
+    } else if ((email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email))) {
+      errors.email = 'Please enter a valid email address.';
+    }
+
+    if (!formData.city.trim()) {
+      errors.city = 'City / District is required.';
+    }
+
+    if (!formData.consent) {
+      errors.consent = 'You must consent to being contacted regarding your inquiry.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
+    pendingRef.current = true;
+    setIsSubmitting(true);
+    setResult(await submitEnquiry(formData, endpoint));
+    pendingRef.current = false;
+    setIsSubmitting(false);
   };
 
   return (
-    <section id="contact" className="w-full py-16 sm:py-24 bg-white border-b border-[#EAEAEA]">
+    <section id="contact" className="section-with-backdrop w-full py-16 sm:py-24 bg-white border-b border-[#EAEAEA]">
+      <SectionBackdrop label="CONTACT" />
       <div id="register" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -34,171 +82,255 @@ export const ContactForm: React.FC = () => {
               Whether you have an idea in your head, an artisanal product in your home, or an early-stage venture ready to scale, join our community of aspiring Maharashtra entrepreneurs.
             </p>
 
-            {/* Direct Contact Notice */}
-            <div className="p-5 rounded-2xl bg-[#FCFBF9] border border-[#EAEAEA] space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-[#111827]">
-                <AlertCircle className="w-4 h-4 text-[#E27500]" />
-                <span>Public Communications Channels</span>
-              </div>
-              <div className="pending-placeholder text-[11px] w-full">
-                [PENDING CLIENT INPUT — public phone, email, WhatsApp integration, section 09]
-              </div>
-              <div className="pending-placeholder text-[11px] w-full">
-                [PENDING CLIENT INPUT — official head office address, item 09-11]
-              </div>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-[#1B2A3A] text-white">
-              <h4 className="text-base font-bold text-white mb-2">
-                Upcoming Flagship: NSE Mumbai 2026
-              </h4>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                If applying for an invite to the Global Marathi Entrepreneurship Expo at NSE India (27 Oct 2026), please specify your annual turnover in the message field below.
-              </p>
-            </div>
           </div>
 
           {/* Right Column: Registration Form */}
           <div className="lg:col-span-7">
             <div className="bg-[#FCFBF9] rounded-3xl p-6 sm:p-10 border border-[#EAEAEA] shadow-lg">
               
-              {submitted ? (
-                <div className="text-center py-12 space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
-                    <CheckCircle2 className="w-8 h-8" />
+              {!endpoint && <p role="status" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><strong>Form preview.</strong> {PREVIEW_MESSAGE}</p>}
+              {result && <p role={result.success ? 'status' : 'alert'} className="mb-5 rounded-xl border border-[#EAEAEA] bg-white p-4 text-sm text-[#4B5563]"><Info className="inline h-4 w-4 mr-2" />{result.message}</p>}
+                <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                  <div>
+                    <h3 className="text-xl font-bold text-[#111827]">
+                      Join the Movement &amp; Express Interest
+                    </h3>
+                    <p className="text-xs text-[#6D6D6D] mt-1">
+                      Fields marked with <span className="text-red-500 font-bold">*</span> are required.
+                    </p>
                   </div>
-                  <h3 className="text-2xl font-extrabold text-[#111827]">
-                    Inquiry Received!
-                  </h3>
-                  <p className="text-sm text-[#4B5563] max-w-md mx-auto">
-                    Thank you, <strong>{formData.fullName}</strong>. Your details have been submitted to the Mi Udyojak Honarach coordination desk.
-                  </p>
-                  <div className="pending-placeholder text-[11px] max-w-sm mx-auto">
-                    [PENDING CLIENT INPUT — submission routing & autoresponder message]
-                  </div>
-                  <button
-                    onClick={() => setSubmitted(false)}
-                    className="mt-6 px-6 py-2.5 rounded-full bg-[#1F2937] text-white text-xs font-semibold hover:bg-black transition-colors"
-                  >
-                    Submit Another Inquiry
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <h3 className="text-xl font-bold text-[#111827] mb-2">
-                    Join the Movement & Express Interest
-                  </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Full Name */}
                     <div>
-                      <label className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
-                        Full Name *
+                      <label htmlFor="contact-fullName" className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
+                        Full Name <span className="text-red-500">*</span>
                       </label>
                       <input
-                        required
+                        id="contact-fullName"
+                        name="fullName"
                         type="text"
+                        required
+                        aria-required="true"
+                        aria-invalid={Boolean(validationErrors.fullName)}
+                        aria-describedby={validationErrors.fullName ? 'contact-fullName-error' : undefined}
+                        autoComplete="name"
                         value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, fullName: e.target.value });
+                          if (validationErrors.fullName) setValidationErrors({ ...validationErrors, fullName: '' });
+                        }}
                         placeholder="e.g. Ramesh Kadam"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 bg-white text-sm outline-none transition-all"
+                        className={`w-full px-4 py-2.5 rounded-xl border bg-white text-sm outline-none transition-all ${
+                          validationErrors.fullName
+                            ? 'border-red-500 bg-red-50/30'
+                            : 'border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20'
+                        }`}
                       />
+                      {validationErrors.fullName && (
+                        <p id="contact-fullName-error" className="text-[11px] text-red-600 mt-1 font-medium">
+                          {validationErrors.fullName}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Mobile Number */}
                     <div>
-                      <label className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
-                        Mobile Number / WhatsApp *
+                      <label htmlFor="contact-phone" className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
+                        Mobile Number / WhatsApp <span className="text-red-500">*</span>
                       </label>
                       <input
-                        required
+                        id="contact-phone"
+                        name="phone"
                         type="tel"
+                        required
+                        aria-required="true"
+                        aria-invalid={Boolean(validationErrors.phone)}
+                        aria-describedby={validationErrors.phone ? 'contact-phone-error' : undefined}
+                        autoComplete="tel"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, phone: e.target.value });
+                          if (validationErrors.phone) setValidationErrors({ ...validationErrors, phone: '' });
+                        }}
                         placeholder="+91 98765 43210"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 bg-white text-sm outline-none transition-all"
+                        className={`w-full px-4 py-2.5 rounded-xl border bg-white text-sm outline-none transition-all ${
+                          validationErrors.phone
+                            ? 'border-red-500 bg-red-50/30'
+                            : 'border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20'
+                        }`}
                       />
+                      {validationErrors.phone && (
+                        <p id="contact-phone-error" className="text-[11px] text-red-600 mt-1 font-medium">
+                          {validationErrors.phone}
+                        </p>
+                      )}
                     </div>
                   </div>
 
+
+                  <div>
+                    <label htmlFor="contact-email" className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="contact-email"
+                      name="email"
+                      type="email"
+                      required
+                      aria-required="true"
+                      autoComplete="email"
+                      maxLength={254}
+                      aria-invalid={Boolean(validationErrors.email)}
+                      aria-describedby={validationErrors.email ? 'contact-email-error' : undefined}
+                      value={formData.email}
+                      onChange={(e) => {
+                        setFormData({ ...formData, email: e.target.value });
+                        if (validationErrors.email) setValidationErrors({ ...validationErrors, email: '' });
+                      }}
+                      placeholder="name@example.com"
+                      className={`w-full px-4 py-2.5 rounded-xl border bg-white text-sm outline-none transition-all ${validationErrors.email ? 'border-red-500 bg-red-50/30' : 'border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20'}`}
+                    />
+                    {validationErrors.email && (
+                      <p id="contact-email-error" className="text-[11px] text-red-600 mt-1 font-medium">
+                        {validationErrors.email}
+                      </p>
+                    )}
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* City / District */}
                     <div>
-                      <label className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
-                        City / District (Maharashtra) *
+                      <label htmlFor="contact-city" className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
+                        City / District (Maharashtra) <span className="text-red-500">*</span>
                       </label>
                       <input
-                        required
+                        id="contact-city"
+                        name="city"
                         type="text"
+                        required
+                        aria-required="true"
+                        aria-invalid={Boolean(validationErrors.city)}
+                        aria-describedby={validationErrors.city ? 'contact-city-error' : undefined}
+                        autoComplete="address-level2"
                         value={formData.city}
-                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        onChange={(e) => {
+                          setFormData({ ...formData, city: e.target.value });
+                          if (validationErrors.city) setValidationErrors({ ...validationErrors, city: '' });
+                        }}
                         placeholder="e.g. Pune, Kolhapur, Solapur..."
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 bg-white text-sm outline-none transition-all"
+                        className={`w-full px-4 py-2.5 rounded-xl border bg-white text-sm outline-none transition-all ${
+                          validationErrors.city
+                            ? 'border-red-500 bg-red-50/30'
+                            : 'border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20'
+                        }`}
                       />
+                      {validationErrors.city && (
+                        <p id="contact-city-error" className="text-[11px] text-red-600 mt-1 font-medium">
+                          {validationErrors.city}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Current Business Stage */}
                     <div>
-                      <label className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
+                      <label htmlFor="contact-stage" className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
                         Current Business Stage
                       </label>
                       <select
+                        id="contact-stage"
+                        name="stage"
+                        aria-label="Current Business Stage"
                         value={formData.stage}
                         onChange={(e) => setFormData({ ...formData, stage: e.target.value })}
                         className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 bg-white text-sm outline-none transition-all"
                       >
-                        <option>Aspiring Entrepreneur (Idea Stage)</option>
-                        <option>Early Stage / Bootstrapped (&lt; 2 Years)</option>
-                        <option>Established Micro/Small Business (MSME)</option>
-                        <option>Crore-Level Business (Seeking Expo 2026 Access)</option>
-                        <option>Prospective Mentor / Advisor</option>
+                        <option value="Aspiring Entrepreneur (Idea Stage)">Aspiring Entrepreneur (Idea Stage)</option>
+                        <option value="Early Stage / Bootstrapped (< 2 Years)">Early Stage / Bootstrapped (&lt; 2 Years)</option>
+                        <option value="Established Micro/Small Business (MSME)">Established Micro/Small Business (MSME)</option>
+                        
+                        <option value="Prospective Mentor / Advisor">Prospective Mentor / Advisor</option>
                       </select>
                     </div>
                   </div>
 
+                  {/* Area of Primary Interest */}
                   <div>
-                    <label className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
+                    <label htmlFor="contact-interest" className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
                       Area of Primary Interest
                     </label>
                     <select
+                      id="contact-interest"
+                      name="interest"
+                      aria-label="Area of Primary Interest"
                       value={formData.interest}
                       onChange={(e) => setFormData({ ...formData, interest: e.target.value })}
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 bg-white text-sm outline-none transition-all"
                     >
-                      <option>Mentorship & Guidance (Service 03)</option>
-                      <option>Networking Events & Seminars (Service 01)</option>
-                      <option>Business Promotion & Exhibitions (Service 02)</option>
-                      <option>Awards & Recognition Program (Service 04)</option>
-                      <option>Global Marathi Entrepreneurship Expo 2026</option>
+                      <option value="Mentorship & Guidance (Service 03)">Mentorship &amp; Guidance (Service 03)</option>
+                      <option value="Networking Events & Seminars (Service 01)">Networking Events &amp; Seminars (Service 01)</option>
+                      <option value="Business Promotion & Exhibitions (Service 02)">Business Promotion &amp; Exhibitions (Service 02)</option>
+                      <option value="Awards & Recognition Program (Service 04)">Awards &amp; Recognition Program (Service 04)</option>
                     </select>
                   </div>
 
+                  {/* Business Idea or Message */}
                   <div>
-                    <label className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
-                      Your Business Idea or Message
+                    <label htmlFor="contact-message" className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
+                      Your Business Idea or Message <span className="text-gray-400 font-normal">(Optional)</span>
                     </label>
                     <textarea
+                      id="contact-message"
+                      name="message"
                       rows={3}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Tell us briefly about your venture, sector, or what guidance you need..."
+                      placeholder="Tell us briefly about your venture, sector, or guidance required..."
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 bg-white text-sm outline-none transition-all"
                     />
                   </div>
 
+                  {/* Contact Consent Checkbox */}
+                  <div>
+                    <label htmlFor="contact-consent" className="flex items-start gap-2.5 cursor-pointer select-none">
+                      <input
+                        id="contact-consent"
+                        name="consent"
+                        type="checkbox"
+                        required
+                        aria-required="true"
+                        aria-invalid={Boolean(validationErrors.consent)}
+                        aria-describedby={validationErrors.consent ? 'contact-consent-error' : undefined}
+                        checked={formData.consent}
+                        onChange={(e) => {
+                          setFormData({ ...formData, consent: e.target.checked });
+                          if (validationErrors.consent) setValidationErrors({ ...validationErrors, consent: '' });
+                        }}
+                        className="mt-0.5 rounded text-[#E27500] focus:ring-[#E27500]"
+                      />
+                      <span className="text-xs text-[#4B5563] leading-relaxed">
+                        I consent to being contacted regarding my enterprise inquiry and receiving community guidance updates. <span className="text-red-500">*</span>
+                      </span>
+                    </label>
+                    {validationErrors.consent && (
+                      <p id="contact-consent-error" className="text-[11px] text-red-600 mt-1 font-medium">
+                        {validationErrors.consent}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Submit Button */}
                   <div className="pt-2">
                     <button
                       type="submit"
-                      className="w-full py-3.5 px-6 rounded-full bg-[#E27500] hover:bg-[#C56300] text-white text-sm font-bold tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer group"
+                      disabled={isSubmitting}
+                      className="w-full py-3.5 px-6 rounded-full bg-[#E27500] hover:bg-[#C56300] active:bg-[#B35500] text-white text-sm font-bold tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E27500] group"
                     >
-                      <span>Submit Details</span>
+                      <span>{isSubmitting ? 'Sending...' : endpoint ? 'Submit Inquiry' : 'Preview Inquiry'}</span>
                       <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
-
-                  <div className="pt-2">
-                    <div className="pending-placeholder text-[11px] w-full text-center">
-                      [PENDING CLIENT INPUT — submission routing, WhatsApp integration, section 09]
-                    </div>
-                  </div>
                 </form>
-              )}
 
             </div>
           </div>
@@ -209,3 +341,5 @@ export const ContactForm: React.FC = () => {
     </section>
   );
 };
+
+export default ContactForm;

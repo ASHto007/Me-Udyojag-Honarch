@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, User, Briefcase, Calendar, Award, Users, Image, MessageSquare } from 'lucide-react';
 
 export const FloatingDock: React.FC = () => {
   const [activeSection, setActiveSection] = useState('top');
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isScrollingRef = useRef(false);
+  const [isCompressed, setIsCompressed] = useState(false);
 
   const navItems = [
     { href: '#', label: 'Home', icon: Home, id: 'top' },
@@ -18,7 +16,7 @@ export const FloatingDock: React.FC = () => {
     { href: '#contact', label: 'Join', icon: MessageSquare, id: 'contact' },
   ];
 
-  // Active Section Detection: Home active at top, About not highlighted prematurely
+  // Scroll logic: Active section + Exact collapse threshold
   useEffect(() => {
     const sectionList = [
       { id: 'top', dockId: 'top' },
@@ -29,29 +27,34 @@ export const FloatingDock: React.FC = () => {
       { id: 'mentors', dockId: 'mentors' },
       { id: 'community', dockId: 'community' },
       { id: 'gallery', dockId: 'gallery' },
-      { id: 'contact', dockId: 'contact' }
+      { id: 'contact', dockId: 'contact' },
     ];
 
     let ticking = false;
 
-    const checkActive = () => {
+    const handleScroll = () => {
       const scrollY = window.scrollY;
 
-      // 1. Home must always be active when hero is visible near top
+      // ─── 1. Scroll-based Compression Threshold ───
+      // Top: icons + labels. Scroll > 100px: icons only. Return <= 40px: expand again.
+      if (scrollY > 100) {
+        setIsCompressed(true);
+      } else if (scrollY <= 40) {
+        setIsCompressed(false);
+      }
+
+      // ─── 2. Active Section Highlighting ───
       if (scrollY < 260) {
         setActiveSection('top');
         return;
       }
 
-      // 2. Near bottom of page -> Contact / Join
       if (window.innerHeight + scrollY >= document.documentElement.scrollHeight - 70) {
         setActiveSection('contact');
         return;
       }
 
-      // 3. Trigger line accounts for sticky elements and viewport center
       const triggerY = scrollY + window.innerHeight * 0.38;
-
       let currentId = 'top';
       for (const item of sectionList) {
         const el = document.getElementById(item.id);
@@ -66,52 +69,26 @@ export const FloatingDock: React.FC = () => {
       setActiveSection(currentId);
     };
 
-    const handleScrollActive = () => {
+    const onScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          checkActive();
+          handleScroll();
           ticking = false;
         });
         ticking = true;
       }
     };
 
-    // Initial check
-    checkActive();
+    handleScroll();
 
-    window.addEventListener('scroll', handleScrollActive, { passive: true });
-    window.addEventListener('resize', handleScrollActive, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScrollActive);
-      window.removeEventListener('resize', handleScrollActive);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
   }, []);
-
-  // Lightweight scroll collapse handler (zero DOM reads)
-  const handleScroll = useCallback(() => {
-    if (!isScrollingRef.current) {
-      isScrollingRef.current = true;
-      setIsCollapsed(true);
-    }
-
-    if (scrollTimerRef.current) {
-      clearTimeout(scrollTimerRef.current);
-    }
-
-    scrollTimerRef.current = setTimeout(() => {
-      isScrollingRef.current = false;
-      setIsCollapsed(false);
-    }, 280);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
-    };
-  }, [handleScroll]);
 
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
@@ -134,7 +111,7 @@ export const FloatingDock: React.FC = () => {
   return (
     <nav
       aria-label="Floating Navigation"
-      className={`ios-dock ${isCollapsed ? 'ios-dock--collapsed' : 'ios-dock--expanded'}`}
+      className={`ios-dock ${isCompressed ? 'ios-dock--collapsed' : 'ios-dock--expanded'}`}
     >
       {/* Nav items container */}
       <div className="ios-dock__items">

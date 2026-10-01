@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, Play, Pause, Calendar, Award, MapPin, Newspaper, Maximize2 } from 'lucide-react';
-import type { GalleryItemDto } from './Gallery';
+import type { GalleryItemDto } from '../data/galleryData';
 import './OrbitImages.css';
 
 export interface OrbitImagesProps {
@@ -27,8 +27,15 @@ export const OrbitImages: React.FC<OrbitImagesProps> = ({
   const activeCenterIndexRef = useRef<number>(0);
 
   // Controls state
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReducedMotion(media.matches);
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
   const [isManualPaused, setIsManualPaused] = useState<boolean>(false);
-  const [isPlayingVisual, setIsPlayingVisual] = useState<boolean>(true);
+  const isPlayingVisual = !isManualPaused && !reducedMotion;
 
   // Animation controller refs for continuous smooth marquee
   const continuousProgressRef = useRef<number>(0);
@@ -48,7 +55,7 @@ export const OrbitImages: React.FC<OrbitImagesProps> = ({
   const didDragMoveRef = useRef<boolean>(false);
 
   const rafIdRef = useRef<number | null>(null);
-  const lastTimestampRef = useRef<number>(performance.now());
+  const lastTimestampRef = useRef<number>(0);
 
   const originalCount = items.length;
 
@@ -70,7 +77,6 @@ export const OrbitImages: React.FC<OrbitImagesProps> = ({
   // Keep refs synchronized
   useEffect(() => {
     isManualPausedRef.current = isManualPaused;
-    setIsPlayingVisual(!isManualPaused);
   }, [isManualPaused]);
 
   useEffect(() => {
@@ -222,8 +228,7 @@ export const OrbitImages: React.FC<OrbitImagesProps> = ({
 
   // Main continuous marquee animation frame loop
   useEffect(() => {
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
+    if (reducedMotion) {
       renderCards();
       return;
     }
@@ -257,7 +262,7 @@ export const OrbitImages: React.FC<OrbitImagesProps> = ({
     return () => {
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
     };
-  }, [totalCards, renderCards]);
+  }, [totalCards, renderCards, reducedMotion]);
 
   // Hover handlers: immediately freeze, and resume 1 second after pointer leaves
   const handlePointerEnter = useCallback(() => {
@@ -305,8 +310,9 @@ export const OrbitImages: React.FC<OrbitImagesProps> = ({
 
   // Manual Play/Pause toggle
   const togglePlayPause = useCallback(() => {
+    if (reducedMotion) return;
     setIsManualPaused((prev) => !prev);
-  }, []);
+  }, [reducedMotion]);
 
   // Drag / Touch gestures
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -410,9 +416,10 @@ export const OrbitImages: React.FC<OrbitImagesProps> = ({
 
           <button
             onClick={togglePlayPause}
-            className={`rear-oval-btn ${!isPlayingVisual ? 'rear-oval-btn--active' : ''}`}
-            aria-label={isPlayingVisual ? 'Pause autoplay' : 'Play autoplay'}
-            title={isPlayingVisual ? 'Pause (Space)' : 'Play (Space)'}
+            className={`rear-oval-btn ${!(isPlayingVisual && !reducedMotion) ? 'rear-oval-btn--active' : ''}`}
+            disabled={reducedMotion}
+            aria-label={reducedMotion ? 'Autoplay disabled for reduced motion' : isPlayingVisual ? 'Pause autoplay' : 'Play autoplay'}
+            title={reducedMotion ? 'Reduced motion enabled' : isPlayingVisual ? 'Pause (Space)' : 'Play (Space)'}
           >
             {isPlayingVisual ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>

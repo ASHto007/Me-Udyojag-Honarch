@@ -1,30 +1,15 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { SectionBackdrop } from './SectionBackdrop';
+import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { TypewriterText } from './TypewriterText';
 
 export const Hero: React.FC = () => {
-  const heroRef = useRef<HTMLElement | null>(null);
-  const [isHeroVisible, setIsHeroVisible] = useState(true);
-
-  // Pause typing animation if hero is scrolled offscreen
-  useEffect(() => {
-    if (!heroRef.current) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsHeroVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(heroRef.current);
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section
       id="top"
-      ref={heroRef}
-      className="w-full pt-28 sm:pt-36 lg:pt-40 pb-8 sm:pb-12 bg-[#FCFBF9]"
+      className="section-with-backdrop w-full pt-28 sm:pt-36 lg:pt-40 pb-8 sm:pb-12 bg-[#FCFBF9]"
     >
+      <SectionBackdrop label="WELCOME" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
         {/* Editorial Heading Area above the photograph */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-end mb-8 sm:mb-10 lg:mb-12">
@@ -35,7 +20,7 @@ export const Hero: React.FC = () => {
               <span aria-hidden="true">
                 <span className="block text-[#111827]">Dream local.</span>
                 <span className="inline-block text-[#111827]">Build </span>{' '}
-                <TypewriterText phrase="something big." isVisible={isHeroVisible} />
+                <TypewriterText phrase="something big." />
               </span>
             </h1>
           </div>
@@ -51,16 +36,17 @@ export const Hero: React.FC = () => {
         {/* Hero Photograph with Inset CTA Panel */}
         <div className="relative w-full rounded-[24px] sm:rounded-[32px] lg:rounded-[36px] overflow-hidden border border-gray-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.06)] bg-gray-100">
           <img
-            src="/assets/hero-workshop.jpg"
-            alt="Dynamic Maharashtra entrepreneurs collaborating at their workshop table"
-            className="w-full h-[320px] sm:h-[400px] lg:h-[460px] object-cover object-[center_35%]"
-            width={1280}
-            height={460}
+            src="/assets/hero-award-refined.webp"
+            alt="Entrepreneurs celebrating an award presentation at a business event"
+            className="w-full h-auto aspect-[3/2] object-cover object-center"
+            width={1536}
+            height={1024}
             loading="eager"
+            fetchPriority="high"
           />
 
           {/* Inset White CTA Panel (Curved Top-Left Edge) */}
-          <div className="sm:absolute sm:bottom-0 sm:right-0 z-10 bg-white sm:rounded-tl-[2rem] lg:rounded-tl-[2.5rem] p-6 sm:p-7 lg:p-8 sm:max-w-[380px] lg:max-w-[420px] shadow-sm">
+          <div className="z-10 bg-white p-6 sm:p-7 lg:p-8 shadow-sm sm:flex sm:items-center sm:justify-between sm:gap-8">
             <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-[#111827] leading-snug tracking-tight mb-4">
               Your next chapter starts with your own business.
             </h2>
