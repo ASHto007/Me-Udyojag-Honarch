@@ -1,10 +1,11 @@
+import { SAMPLE_MENTORS } from '../data/sampleContent';
 import { APPROVED_MENTORS } from '../data/approvedContent';
 import { SectionBackdrop } from './SectionBackdrop';
 import React from 'react';
 import AccordionGallery, { type MentorGalleryItem } from './AccordionGallery';
 
 export const Mentors: React.FC = () => {
-  const mentorsList: MentorGalleryItem[] = APPROVED_MENTORS;
+  const mentorsList: MentorGalleryItem[] = APPROVED_MENTORS.length ? APPROVED_MENTORS : SAMPLE_MENTORS;
 
   return (
     <section id="mentors" className="section-with-backdrop section-with-backdrop--dark w-full py-16 sm:py-24 bg-[#0B1320] text-white border-b border-gray-800 relative overflow-hidden">
@@ -19,9 +20,8 @@ export const Mentors: React.FC = () => {
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Mentors & Guidance
           </h2>
-          <p className="text-sm sm:text-base text-gray-300">
-            
-          </p>
+          <p className="text-sm sm:text-base text-gray-300">Explore guidance in business planning, marketing, finance and technology.</p>
+          {!APPROVED_MENTORS.length && <p className="text-xs text-orange-200">Sample profiles with fictional names and illustrative avatars.</p>}
         </div>
 
         {/* Mentor Profile Accordion Gallery */}

@@ -18,6 +18,7 @@ export const Events: React.FC = () => {
   const supportingUpcoming = upcomingEvents.filter((e) => e.id !== featuredUpcoming?.id);
 
   const handleOpenEnquiry = (event: EventItem, e: React.MouseEvent<HTMLElement>) => {
+    if (!event.allowsEnquiry || event.isSample) return;
     setTriggerElement(e.currentTarget);
     setEnquiryEvent(event);
     setIsModalOpen(true);
@@ -37,6 +38,7 @@ export const Events: React.FC = () => {
             Community gatherings and entrepreneurship events.
           </p>
 
+          {EVENTS_DATA.some(event => event.isSample) && <p className="mt-3 text-xs font-medium text-[#9A4D00]">Sample events for illustration. Dates and venues are fictional; enquiries are unavailable.</p>}
           {/* Accessible Tab Switcher */}
           <div
             role="tablist"
@@ -155,14 +157,15 @@ export const Events: React.FC = () => {
                       {featuredUpcoming.statusBadge}
                     </div>
                     <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-                      Enquire about participation in this event.
+                      {featuredUpcoming.isSample ? 'Illustrative event. Registration is unavailable.' : 'Enquire about participation in this event.'}
                     </p>
                     <button
                       type="button"
+                      disabled={!featuredUpcoming.allowsEnquiry || featuredUpcoming.isSample}
                       onClick={(e) => handleOpenEnquiry(featuredUpcoming, e)}
-                      className="w-full py-3 px-5 rounded-full bg-[#1F2937] hover:bg-[#E27500] text-white text-xs font-bold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E27500]"
+                      className="disabled:opacity-60 disabled:cursor-not-allowed w-full py-3 px-5 rounded-full bg-[#1F2937] hover:bg-[#E27500] text-white text-xs font-bold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E27500]"
                     >
-                      <span>Request Invitation Details</span>
+                      <span>{featuredUpcoming.isSample ? 'Sample Event' : 'Request Invitation Details'}</span>
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -208,10 +211,11 @@ export const Events: React.FC = () => {
                       </span>
                       <button
                         type="button"
+                        disabled={!item.allowsEnquiry || item.isSample}
                         onClick={(e) => handleOpenEnquiry(item, e)}
-                        className="inline-flex items-center gap-1 text-xs font-bold text-[#E27500] hover:text-[#C56300] cursor-pointer"
+                        className="disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center gap-1 text-xs font-bold text-[#E27500] hover:text-[#C56300] cursor-pointer"
                       >
-                        <span>Inquire for Program</span>
+                        <span>{item.isSample ? 'Sample Event' : 'Inquire for Program'}</span>
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>

@@ -1,10 +1,11 @@
+import { SAMPLE_MILESTONES } from '../data/sampleContent';
 import { APPROVED_MILESTONES } from '../data/approvedContent';
 import { SectionBackdrop } from './SectionBackdrop';
 import React from 'react';
 import { Calendar } from 'lucide-react';
 
 export const Milestones: React.FC = () => {
-  const timeline = APPROVED_MILESTONES;
+  const timeline = APPROVED_MILESTONES.length ? APPROVED_MILESTONES : SAMPLE_MILESTONES;
 
   return (
     <section id="achievements" className="section-with-backdrop section-with-backdrop--dark w-full py-20 bg-[#1B2A3A] text-white border-b border-[#0F172A] relative overflow-hidden">
@@ -24,6 +25,7 @@ export const Milestones: React.FC = () => {
           </p>
         </div>
 
+        {!APPROVED_MILESTONES.length && <p className="mb-8 text-center text-xs text-orange-200">Sample timeline for illustration. Dates and milestones are fictional.</p>}
         {/* Horizontally Centered Timeline */}
         <div className="relative max-w-5xl mx-auto">
           {!timeline.length && <p className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center text-sm text-gray-300">Movement milestones will be published here once confirmed.</p>}

@@ -1,3 +1,4 @@
+import { SAMPLE_EVENTS } from './sampleContent';
 /**
  * Events Data Model & Repository
  * 
@@ -19,9 +20,10 @@ export interface EventItem {
   isFeatured?: boolean;
   type: 'upcoming' | 'past';
   allowsEnquiry: boolean;
+  isSample?: boolean;
   photosAnchor?: string;
   recapNote?: string;
 }
 
-// Publish only records supported by client documentation or explicit approval.
-export const EVENTS_DATA: EventItem[] = [];
+// Sample records for the requested preview.
+export const EVENTS_DATA: EventItem[] = SAMPLE_EVENTS;
