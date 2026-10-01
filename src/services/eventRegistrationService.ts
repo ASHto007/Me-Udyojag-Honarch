@@ -12,7 +12,7 @@ export interface EventRegistrationPayload {
   eventTitle: string;
   fullName: string;
   phone: string;
-  email?: string;
+  email: string;
   businessName?: string;
   cityDistrict: string;
   message?: string;
@@ -33,6 +33,9 @@ export async function submitEventJoinRequest(
   endpointUrl?: string
 ): Promise<RegistrationResult> {
   // Validate required fields
+  if (!payload.eventId?.trim() || !payload.eventTitle?.trim()) {
+    return { success: false, isPreview: false, message: 'Please select an event before sending an enquiry.' };
+  }
   const errors: Record<string, string> = {};
 
   if (!payload.fullName || payload.fullName.trim().length < 2) {
@@ -44,7 +47,9 @@ export async function submitEventJoinRequest(
     errors.phone = "Please enter a valid 10-digit mobile number.";
   }
 
-  if (payload.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email.trim())) {
+  if (!payload.email?.trim()) {
+    errors.email = 'Email Address is required.';
+  } else if (payload.email.trim().length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(payload.email.trim())) {
     errors.email = 'Please provide a valid email address.';
   }
 
@@ -66,5 +71,8 @@ export async function submitEventJoinRequest(
   }
 
   if (!lastEventPayload || JSON.stringify(lastEventPayload) !== JSON.stringify(payload)) lastEventPayload = payload;
-  return submitEnquiry(lastEventPayload, endpointUrl);
+  const result = await submitEnquiry(lastEventPayload, endpointUrl);
+  return result.success && endpointUrl !== 'firebase:event'
+    ? { ...result, message: 'We received your interest in ' + payload.eventTitle.trim() + '.' }
+    : result;
 }

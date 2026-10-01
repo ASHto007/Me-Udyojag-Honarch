@@ -205,18 +205,24 @@ export const EventEnquiryModal: React.FC<EventEnquiryModalProps> = ({
 
             <div>
               <label htmlFor="enquiry-email" className="block text-xs font-bold text-[#374151] mb-1">
-                Email Address <span className="text-gray-400 font-normal">(Optional)</span>
+                Email Address <span className="text-red-500">*</span>
               </label>
               <input
                 id="enquiry-email"
                 name="email"
                 type="email"
+                required
+                aria-required="true"
+                maxLength={254}
+                aria-invalid={Boolean(fieldErrors.email)}
+                aria-describedby={fieldErrors.email ? 'enquiry-email-error' : undefined}
                 autoComplete="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="name@example.com"
                 className="w-full px-3.5 py-2 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 text-xs sm:text-sm outline-none transition-all"
               />
+              {fieldErrors.email && <p id="enquiry-email-error" className="text-[11px] text-red-600 mt-1">{fieldErrors.email}</p>}
             </div>
           </div>
 

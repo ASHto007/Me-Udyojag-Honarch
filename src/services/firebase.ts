@@ -37,8 +37,8 @@ export async function sendWebsiteEnquiry(payload: object, kind: 'contact' | 'eve
   await initializeSubmissionProtection();
   const { getFunctions, httpsCallable } = await import('firebase/functions');
   const functions = getFunctions(firebaseApp, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || 'asia-south1');
-  const submit = httpsCallable<object, { received: boolean; enquiryId: string }>(functions, 'submitWebsiteEnquiry');
+  const submit = httpsCallable<object, { received: boolean; enquiryId: string; message: string }>(functions, 'submitWebsiteEnquiry');
   const { data } = await submit({ ...payload, kind, requestId });
-  if (data?.received !== true || !data.enquiryId) throw new Error('Receipt not confirmed.');
+  if (data?.received !== true || !data.enquiryId || typeof data.message !== 'string' || !data.message.trim()) throw new Error('Receipt not confirmed.');
   return data;
 }

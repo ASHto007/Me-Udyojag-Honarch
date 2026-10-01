@@ -110,7 +110,7 @@ test('only explicit receipt succeeds; HTTP errors, malformed responses, missing 
 });
 
 test('event validation accepts a formatted Indian phone and rejects invalid data without sending', async () => {
-  const payload = { eventId: 'test', eventTitle: 'Test event', fullName: 'Test Person', phone: '+91 98765 43210', cityDistrict: 'Pune', consent: true };
+  const payload = { eventId: 'test', eventTitle: 'Test event', fullName: 'Test Person', phone: '+91 98765 43210', email: 'visitor@example.com', cityDistrict: 'Pune', consent: true };
   assert.equal((await submitEventJoinRequest(payload)).isPreview, true);
   const invalid = await submitEventJoinRequest({ ...payload, phone: '123', consent: false });
   assert.ok(invalid.errors.phone);
@@ -269,6 +269,57 @@ test('contact validates email and passes it to backend notification handling', a
     assert.equal(notification(enquiry,'test-id','approved@example.com',new Date()).replyTo,'visitor@example.com');
   } finally {
     globalThis.fetch = previous;
+    await React.act(async () => root.unmount()); container.remove();
+  }
+});
+
+test('event service submits event context and confirms interest only after receipt', async () => {
+  const previous = globalThis.fetch;
+  const payload = { eventId: 'event-1', eventTitle: 'Founders Meetup', fullName: 'Test Person',
+    phone: '9876543210', email: 'visitor@example.com', cityDistrict: 'Pune',
+    businessName: 'Test Enterprise', message: 'Interested in joining.', consent: true };
+  let submitted, calls = 0;
+  globalThis.fetch = async (_url, options) => { calls++; submitted = JSON.parse(options.body); return Response.json({ received: true }); };
+  try {
+    const missingEmail = await submitEventJoinRequest({ ...payload,email: '' },'https://example.invalid/test');
+    assert.equal(missingEmail.success,false);
+    assert.match(missingEmail.errors.email,/required/);
+    assert.equal(calls,0);
+    const result = await submitEventJoinRequest(payload,'https://example.invalid/test');
+    assert.equal(result.message,'We received your interest in Founders Meetup.');
+    assert.equal(submitted.eventId,'event-1');
+    assert.equal(submitted.eventTitle,'Founders Meetup');
+    assert.equal(submitted.businessName,'Test Enterprise');
+    assert.equal(submitted.email,'visitor@example.com');
+    globalThis.fetch = async () => Response.json({ received: false });
+    assert.equal((await submitEventJoinRequest(payload,'https://example.invalid/test')).success,false);
+  } finally { globalThis.fetch = previous; }
+});
+
+test('video cards load a player only after selection and closing removes playback', async () => {
+  const React = await import('react');
+  const { createRoot } = await import('react-dom/client');
+  const { Videos } = await import('../src/components/Videos.tsx');
+  const { YOUTUBE_VIDEOS } = await import('../src/data/videosData.ts');
+  const container = document.createElement('div'); document.getElementById('root').append(container);
+  const root = createRoot(container);
+  try {
+    await React.act(async () => root.render(React.createElement(Videos)));
+    const buttons = container.querySelectorAll('button[aria-label^="Play video:"]');
+    assert.equal(buttons.length,6);
+    assert.equal(document.querySelector('iframe'),null);
+    for (const index of [0,5]) {
+      buttons[index].focus();
+      await React.act(async () => buttons[index].click());
+      const iframe = document.querySelector('dialog[open] iframe');
+      assert.ok(iframe.src.startsWith('https://www.youtube-nocookie.com/embed/' + YOUTUBE_VIDEOS[index].id));
+      assert.equal(iframe.title,YOUTUBE_VIDEOS[index].title);
+      assert.equal(document.getElementById('root').inert,true);
+      await React.act(async () => document.querySelector('[aria-label="Close video"]').click());
+      assert.equal(document.querySelector('iframe'),null);
+      assert.equal(document.activeElement,buttons[index]);
+    }
+  } finally {
     await React.act(async () => root.unmount()); container.remove();
   }
 });

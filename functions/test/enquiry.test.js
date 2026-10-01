@@ -39,8 +39,10 @@ test('stores enquiry and fixed-recipient notification, including visitor reply-t
   const { submit,records } = fixture();
   const result = await submit(payload({ email: 'visitor@example.com', businessName: 'Test business' }));
   assert.equal(result.received,true);
+  assert.equal(result.message,'We received your enquiry.');
   const mail = records.get('mail/' + result.enquiryId);
   assert.deepEqual(mail.to,['approved@example.com']);
+  assert.equal(mail.message.subject,'New Website Enquiry');
   assert.equal(mail.replyTo,'visitor@example.com');
   assert.match(mail.message.text,/Business Name: Test business/);
   assert.match(mail.message.text,/Enquiry ID:/);
@@ -49,7 +51,13 @@ test('stores enquiry and fixed-recipient notification, including visitor reply-t
 test('event submissions include event context', async () => {
   const { submit,records } = fixture();
   const result = await submit(payload({ kind: 'event', cityDistrict: 'Mumbai', eventId: 'event-1', eventTitle: 'Test event' }));
-  assert.match(records.get('mail/' + result.enquiryId).message.text,/Event Name: Test event/);
+  const mail = records.get('mail/' + result.enquiryId);
+  assert.equal(result.message,'We received your interest in Test event.');
+  assert.equal(mail.message.subject,'New Event Enquiry \u2014 Test event');
+  assert.match(mail.message.text,/Event ID: event-1/);
+  assert.match(mail.message.text,/Event Name: Test event/);
+  assert.equal(records.get('enquiries/' + result.enquiryId).kind,'event');
+  await assert.rejects(submit(payload({ kind: 'event', cityDistrict: 'Mumbai', eventId: 'event-1', eventTitle: 'Test event', email: '' })),{ code: 'invalid-argument' });
 });
 test('retry returns the same receipt and cannot overwrite a different payload', async () => {
   const { submit,records } = fixture(), input = payload();

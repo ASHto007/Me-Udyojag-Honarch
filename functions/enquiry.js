@@ -22,7 +22,7 @@ export function validateSubmission(input) {
   };
   const digits = field('phone', 10, 30).replace(/\D/g, '');
   if (!/^(?:91)?\d{10}$/.test(digits)) invalid('Please enter a valid mobile number.');
-  const email = field('email', input.kind === 'contact' ? 1 : 0, 254);
+  const email = field('email', 1, 254);
   if (email && !isEmail(email)) invalid('Please enter a valid email address.');
   return {
     requestId: input.requestId, kind: input.kind, fullName: field('fullName', 2),
@@ -40,12 +40,12 @@ export function notification(enquiry, id, recipient, submittedAt) {
     ['Name', enquiry.fullName], ['Mobile', enquiry.phone], ['Email', enquiry.email],
     ['City / District', enquiry.city], ['Business Name', enquiry.businessName],
     ['Area of Interest', enquiry.interest], ['Business Stage', enquiry.stage],
-    ['Event Name', enquiry.eventTitle], ['Message', enquiry.message],
+    ['Event ID', enquiry.eventId], ['Event Name', enquiry.eventTitle], ['Message', enquiry.message],
     ['Submitted At', submittedAt.toISOString()], ['Enquiry ID', id],
   ];
   return {
     to: [recipient], ...(enquiry.email ? { replyTo: enquiry.email } : {}),
-    message: { subject: 'New Website Enquiry ? Mi Udyojak Honarach',
+    message: { subject: enquiry.kind === 'event' ? 'New Event Enquiry \u2014 ' + enquiry.eventTitle : 'New Website Enquiry',
       text: lines.map(([label, value]) => label + ': ' + (value || 'Not supplied')).join('\n') },
   };
 }
@@ -86,5 +86,7 @@ export async function receiveEnquiry({ db, input, ip, recipient, rateSecret, now
     tx.create(ref, { ...saved, fingerprint, createdAt: now, notificationId: id });
     tx.create(mail, { ...job, enquiryId: id, createdAt: now });
   });
-  return { received: true, enquiryId: id };
+  return { received: true, enquiryId: id, message: enquiry.kind === 'event'
+    ? 'We received your interest in ' + enquiry.eventTitle + '.'
+    : 'We received your enquiry.' };
 }

@@ -19,8 +19,8 @@ export async function submitEnquiry(payload: object, endpoint?: string): Promise
         requestId = crypto.randomUUID();
         requestIds.set(payload, requestId);
       }
-      await sendWebsiteEnquiry(payload, endpoint === 'firebase:event' ? 'event' : 'contact', requestId);
-      return { success: true, isPreview: false, message: 'Your enquiry has been received.' };
+      const receipt = await sendWebsiteEnquiry(payload, endpoint === 'firebase:event' ? 'event' : 'contact', requestId);
+      return { success: true, isPreview: false, message: receipt.message };
     }
     const response = await fetch(endpoint, {
       method: 'POST',

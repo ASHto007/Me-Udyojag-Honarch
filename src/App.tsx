@@ -10,6 +10,7 @@ import { Stories } from './components/Stories';
 import { Mentors } from './components/Mentors';
 import { Events } from './components/Events';
 import { Gallery } from './components/Gallery';
+import { Videos } from './components/Videos';
 import { ContactForm } from './components/ContactForm';
 import { Footer } from './components/Footer';
 import { FloatingDock } from './components/FloatingDock';
@@ -32,6 +33,7 @@ function App() {
         <Mentors />
         <Events />
         <Gallery />
+        <Videos />
         <ContactForm />
       </main>
 

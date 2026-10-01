@@ -4,7 +4,7 @@
 
 Recipient: ashutoshto007@gmail.com (server parameter ENQUIRY_RECIPIENT).
 Function: submitWebsiteEnquiry in asia-south1.
-Both React forms call this function. It validates input and consent, then atomically stores enquiries/{id} and mail/{id}. Visitors see ?Your enquiry has been received? after the transaction commits. SMTP delivery happens later.
+Both React forms call this function. It validates input and consent, then atomically stores enquiries/{id} and mail/{id}. Visitors see confirmation after the transaction commits. SMTP delivery happens later.
 
 The sender, SMTP connection, App Check site key, cloud deployment and live delivery verification are still pending. The frontend cannot submit successfully until the function and App Check are configured.
 
@@ -74,3 +74,12 @@ No SMTP secrets or recipient controls are accepted from the browser. Emails use 
 Rate keys contain HMAC hashes of IPs and normalized phones; raw IPs are not stored.
 Request IDs remain in browser memory so retries reuse an enquiry while the form stays loaded. Reloading the page starts a new request; there is no cross-reload deduplication.
 Unit tests cover validation, receipt behavior, duplicate prevention, rate limits and delivery failure retention with an in-memory transaction adapter. Cloud/emulator integration and real SMTP delivery must still be verified before launch.
+
+## Form behavior
+
+Both forms require name, phone, email, city and consent. The general form includes business stage, area of interest and an optional message. Event enquiries include optional business name and message, plus the selected event ID and title automatically.
+
+General email subject: New Website Enquiry. Confirmation: We received your enquiry.
+Event email subject: New Event Enquiry — [Event Name]. Confirmation: We received your interest in [Event Name].
+
+The callable backend returns the confirmation after successful storage. Both kinds are stored in enquiries with their kind; notifications are queued in mail for the approved recipient. Sample events remain non-registerable. Replace them with confirmed records and allowsEnquiry: true to enable their Request Invitation button.
