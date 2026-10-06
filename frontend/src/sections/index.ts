@@ -1,0 +1,11 @@
+export { Hero } from '../components/Hero';
+export { AboutCompany as About } from '../components/AboutCompany';
+export { Programs as Services } from '../components/Programs';
+export { Milestones } from '../components/Milestones';
+export { Mentors } from '../components/Mentors';
+export { Events } from '../components/Events';
+export { Gallery } from '../components/Gallery';
+export { Stories as SuccessStories } from '../components/Stories';
+export { Videos } from '../components/Videos';
+export { ContactForm as Join } from '../components/ContactForm';
+export { Footer } from '../components/Footer';

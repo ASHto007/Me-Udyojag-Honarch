@@ -1,0 +1,92 @@
+import { Enquiry } from '../models/Enquiry.js';
+import { normalizeEmail } from '../utils/normalizeEmail.js';
+import { normalizePhone } from '../utils/normalizePhone.js';
+import { stripHtml } from '../utils/sanitize.js';
+import { sendEnquiryAdminEmail, sendEnquiryUserEmail } from '../services/emailService.js';
+
+/**
+ * Handle new general enquiry submission.
+ * 
+ * POST /api/enquiries
+ */
+export async function createEnquiry(req, res, next) {
+  try {
+    // Explicit extraction of controlled fields (never trust req.body wholesale)
+    const {
+      fullName,
+      email,
+      phone,
+      city,
+      stage,
+      interest,
+      message,
+      consent,
+    } = req.body;
+
+    const controlledPayload = {
+      fullName: stripHtml(fullName),
+      email: normalizeEmail(email),
+      phone: normalizePhone(phone),
+      city: stripHtml(city),
+      stage: stripHtml(stage) || 'Aspiring Entrepreneur (Idea Stage)',
+      interest: stripHtml(interest) || 'Mentorship & Guidance (Service 03)',
+      message: stripHtml(message) || '',
+      consent: Boolean(consent),
+      ip: req.ip || req.headers['x-forwarded-for'] || '',
+      status: 'new',
+    };
+
+    const enquiry = await Enquiry.create(controlledPayload);
+
+    // Asynchronously dispatch notifications (do not block client response)
+    Promise.allSettled([
+      sendEnquiryAdminEmail(enquiry),
+      sendEnquiryUserEmail(enquiry),
+    ]).catch((err) => console.error('[Email Dispatch Warning]:', err));
+
+    return res.status(201).json({
+      success: true,
+      message: 'Your enquiry has been received successfully. Our team will contact you shortly.',
+      data: {
+        id: enquiry._id,
+        fullName: enquiry.fullName,
+        createdAt: enquiry.createdAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * Future-ready administrative listing of enquiries.
+ * 
+ * GET /api/enquiries
+ */
+export async function getEnquiries(req, res, next) {
+  try {
+    const page = parseInt(req.query.page || '1', 10);
+    const limit = parseInt(req.query.limit || '20', 10);
+    const skip = (page - 1) * limit;
+
+    const [enquiries, total] = await Promise.all([
+      Enquiry.find().sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      Enquiry.countDocuments(),
+    ]);
+
+    return res.json({
+      success: true,
+      data: enquiries,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export default { createEnquiry, getEnquiries };
