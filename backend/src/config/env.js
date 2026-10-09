@@ -1,5 +1,12 @@
 import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Explicitly load backend/.env reliably regardless of working directory
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 dotenv.config();
 
 const isTestEnv =
@@ -22,11 +29,11 @@ export const config = {
     ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim().replace(/\/+$/, '')).filter(Boolean)
     : [],
   smtp: {
-    service: process.env.SMTP_SERVICE || '',
-    host: process.env.SMTP_HOST || '',
+    service: (process.env.SMTP_SERVICE || '').trim().toLowerCase(),
+    host: (process.env.SMTP_HOST || '').trim(),
     port: parseInt(process.env.SMTP_PORT || '587', 10),
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
+    user: (process.env.SMTP_USER || '').trim(),
+    pass: (process.env.SMTP_PASS || '').replace(/\s+/g, ''),
   },
 };
 
