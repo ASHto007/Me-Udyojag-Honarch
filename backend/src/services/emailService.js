@@ -27,12 +27,9 @@ function getTransporter() {
     console.log(`[EmailService] Initialized with SMTP service: ${config.smtp.service} (${config.smtp.user})`);
     transporter = nodemailer.createTransport({
       service: config.smtp.service,
-      pool: true,
-      maxConnections: 3,
-      maxMessages: 100,
-      connectionTimeout: 8000,
-      greetingTimeout: 8000,
-      socketTimeout: 10000,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
       auth: {
         user: config.smtp.user,
         pass: config.smtp.pass,
@@ -44,12 +41,9 @@ function getTransporter() {
       host: config.smtp.host,
       port: config.smtp.port,
       secure: config.smtp.port === 465,
-      pool: true,
-      maxConnections: 3,
-      maxMessages: 100,
-      connectionTimeout: 8000,
-      greetingTimeout: 8000,
-      socketTimeout: 10000,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
       auth: {
         user: config.smtp.user,
         pass: config.smtp.pass,
