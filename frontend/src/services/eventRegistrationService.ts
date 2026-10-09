@@ -84,27 +84,67 @@ export async function registerForEvent(
   }
 
   try {
-    const response = await apiClient.post('/event-registrations', payload);
-    return {
-      success: true,
-      isPreview: false,
-      message: response.message || `Registration request submitted for ${payload.eventTitle.trim()}. Your request has been sent for admin review. Once approved, you will receive a confirmation email.`,
-      data: response.data,
-    };
-  } catch (error) {
-    if (error instanceof ApiError) {
+    // 1. Submit directly to Web3Forms over HTTPS (guarantees email delivery to admin)
+    const formData = new FormData();
+    formData.append('access_key', '9f429b26-8194-4934-a377-0cfc8c7f6c81');
+    formData.append('subject', `[New Event Registration] ${payload.eventTitle} - ${payload.fullName}`);
+    formData.append('from_name', 'Mi Udyojak Honarach Events');
+    formData.append('name', payload.fullName);
+    formData.append('email', payload.email);
+    formData.append('phone', payload.phone);
+    formData.append('event_name', payload.eventTitle);
+    formData.append('business_name', payload.businessName);
+    formData.append('turnover_net_worth', payload.netWorth);
+    formData.append('city_district', payload.cityDistrict);
+    formData.append('message', payload.message);
+
+    const response = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    // 2. Also persist to MongoDB backend in background
+    apiClient.post('/event-registrations', payload).catch((err) => {
+      console.warn('[Backend Sync Note]:', err?.message || err);
+    });
+
+    if (data.success) {
+      return {
+        success: true,
+        isPreview: false,
+        message: `Registration request submitted for ${payload.eventTitle.trim()}. Your request has been sent for admin review. Once approved, you will receive a confirmation email.`,
+        data,
+      };
+    } else {
+      throw new Error(data.message || 'Error submitting event registration.');
+    }
+  } catch (error: any) {
+    // Fallback to backend API
+    try {
+      const response = await apiClient.post('/event-registrations', payload);
+      return {
+        success: true,
+        isPreview: false,
+        message: response.message || `Registration request submitted for ${payload.eventTitle.trim()}.`,
+        data: response.data,
+      };
+    } catch (fallbackErr: any) {
+      if (fallbackErr instanceof ApiError) {
+        return {
+          success: false,
+          isPreview: false,
+          message: fallbackErr.message,
+          errors: (fallbackErr.data as { errors?: Record<string, string> })?.errors,
+        };
+      }
       return {
         success: false,
         isPreview: false,
-        message: error.message,
-        errors: (error.data as { errors?: Record<string, string> })?.errors,
+        message: error?.message || 'Failed to complete registration. Please try again later.',
       };
     }
-    return {
-      success: false,
-      isPreview: false,
-      message: 'Failed to complete registration. Please try again later.',
-    };
   }
 }
 
