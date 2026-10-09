@@ -24,17 +24,23 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
 
 // Cross-Origin Resource Sharing
-const allowedOrigins = Array.from(
-  new Set([
-    config.frontendUrl,
-    config.frontendUrl.replace('://', '://www.'),
-    config.frontendUrl.replace('://www.', '://'),
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:3000',
-    ...(config.allowedOrigins || []),
-  ])
-).filter(Boolean);
+const staticAllowedOrigins = [
+  'https://www.miudyojakhonarach.com',
+  'https://miudyojakhonarach.com',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:3000',
+  'http://localhost:5000',
+];
+
+const dynamicOrigins = [
+  config.frontendUrl,
+  config.frontendUrl?.replace('://', '://www.'),
+  config.frontendUrl?.replace('://www.', '://'),
+  ...(config.allowedOrigins || []),
+];
+
+const allowedOrigins = Array.from(new Set([...staticAllowedOrigins, ...dynamicOrigins])).filter(Boolean);
 
 app.use(
   cors({
@@ -44,7 +50,9 @@ app.use(
       if (
         allowedOrigins.includes(origin) ||
         origin.endsWith('.vercel.app') ||
-        origin.endsWith('.netlify.app')
+        origin.endsWith('.netlify.app') ||
+        origin.endsWith('.onrender.com') ||
+        origin.includes('miudyojakhonarach.com')
       ) {
         return callback(null, true);
       }
