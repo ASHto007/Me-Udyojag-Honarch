@@ -20,7 +20,15 @@ export const swaggerSpec = {
   servers: [
     {
       url: '/api',
-      description: 'Current Environment API Server',
+      description: 'Current Environment API Server (Auto-resolved)',
+    },
+    {
+      url: 'https://me-udyojag-honarch.onrender.com/api',
+      description: 'Production Render API Server',
+    },
+    {
+      url: 'https://www.miudyojakhonarach.com/api',
+      description: 'Production Custom Domain API',
     },
     {
       url: 'http://localhost:5000/api',
@@ -30,7 +38,7 @@ export const swaggerSpec = {
   tags: [
     {
       name: 'System Health',
-      description: 'Application liveness and database diagnostic endpoints',
+      description: 'Application liveness, readiness, and database diagnostic endpoints',
     },
     {
       name: 'Enquiries',
@@ -38,7 +46,7 @@ export const swaggerSpec = {
     },
     {
       name: 'Event Registrations',
-      description: 'Participant conclave registration and duplicate validation',
+      description: 'Participant conclave registration and submission review',
     },
   ],
   paths: {
@@ -67,6 +75,55 @@ export const swaggerSpec = {
                 },
               },
             },
+          },
+        },
+      },
+    },
+    '/health/live': {
+      get: {
+        summary: 'Container liveness probe',
+        description: 'Lightweight liveness probe returning HTTP 200 and process uptime.',
+        tags: ['System Health'],
+        responses: {
+          200: {
+            description: 'Process is alive.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    status: { type: 'string', example: 'alive' },
+                    uptime: { type: 'number', example: 124.5 },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    '/health/ready': {
+      get: {
+        summary: 'Database readiness probe',
+        description: 'Readiness check returning HTTP 200 when MongoDB is connected, 503 otherwise.',
+        tags: ['System Health'],
+        responses: {
+          200: {
+            description: 'Database is ready to receive traffic.',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    ready: { type: 'boolean', example: true },
+                    database: { type: 'string', example: 'connected' },
+                  },
+                },
+              },
+            },
+          },
+          503: {
+            description: 'Database disconnected.',
           },
         },
       },
@@ -162,7 +219,7 @@ export const swaggerSpec = {
       post: {
         summary: 'Register for an upcoming conclave or workshop event',
         description:
-          'Registers a participant for a specific event. Enforces unique constraint per event and email/phone, preventing duplicate sign-ups.',
+          'Registers a participant for a specific conclave or event. Sanitizes inputs, stores registration in MongoDB, and asynchronously dispatches admin review notification and applicant confirmation emails.',
         tags: ['Event Registrations'],
         requestBody: {
           required: true,
@@ -260,13 +317,20 @@ export const swaggerSpec = {
         type: 'object',
         properties: {
           status: { type: 'string', example: 'ok' },
-          timestamp: { type: 'string', format: 'date-time', example: '2026-10-06T14:03:40.292Z' },
-          uptime: { type: 'number', example: 124.52 },
+          timestamp: { type: 'string', format: 'date-time', example: '2026-10-09T18:40:40.292Z' },
+          uptime: { type: 'number', example: 124 },
           database: {
             type: 'object',
             properties: {
               status: { type: 'string', example: 'connected' },
               connected: { type: 'boolean', example: true },
+            },
+          },
+          system: {
+            type: 'object',
+            properties: {
+              nodeVersion: { type: 'string', example: 'v20.18.0' },
+              memoryUsageMb: { type: 'number', example: 48 },
             },
           },
         },
@@ -442,14 +506,16 @@ export const swaggerSpec = {
           success: { type: 'boolean', example: true },
           message: {
             type: 'string',
-            example: 'Registration confirmed for Global Marathi Entrepreneurship Expo 2027.',
+            example: 'Registration request submitted for Global Marathi Entrepreneurship Expo 2027. Your request has been sent for admin review. Once approved, you will receive a confirmation email.',
           },
           data: {
             type: 'object',
             properties: {
               id: { type: 'string', example: '6ac4ffdedea64b14a8800694' },
               eventId: { type: 'string', example: 'expo-2027' },
+              eventTitle: { type: 'string', example: 'Global Marathi Entrepreneurship Expo 2027' },
               fullName: { type: 'string', example: 'Aakash More' },
+              status: { type: 'string', example: 'pending' },
               createdAt: { type: 'string', format: 'date-time' },
             },
           },
@@ -470,8 +536,11 @@ export const swaggerSpec = {
                 fullName: { type: 'string' },
                 email: { type: 'string' },
                 phone: { type: 'string' },
-                cityDistrict: { type: 'string' },
-                attendeeType: { type: 'string' },
+                businessName: { type: 'string', example: 'Sahyadri Agro Solutions' },
+                netWorth: { type: 'string', example: '₹100+ Cr' },
+                cityDistrict: { type: 'string', example: 'Pune' },
+                message: { type: 'string' },
+                status: { type: 'string', example: 'pending' },
                 createdAt: { type: 'string', format: 'date-time' },
               },
             },
