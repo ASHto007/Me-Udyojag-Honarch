@@ -30,6 +30,9 @@ function getTransporter() {
       pool: true,
       maxConnections: 3,
       maxMessages: 100,
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
       auth: {
         user: config.smtp.user,
         pass: config.smtp.pass,
@@ -44,6 +47,9 @@ function getTransporter() {
       pool: true,
       maxConnections: 3,
       maxMessages: 100,
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 10000,
       auth: {
         user: config.smtp.user,
         pass: config.smtp.pass,
