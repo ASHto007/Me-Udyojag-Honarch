@@ -27,10 +27,8 @@ app.use(compression());
 const staticAllowedOrigins = [
   'https://www.miudyojakhonarach.com',
   'https://miudyojakhonarach.com',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://localhost:3000',
-  'http://localhost:5000',
+  'http://www.miudyojakhonarach.com',
+  'http://miudyojakhonarach.com',
 ];
 
 const dynamicOrigins = [
@@ -42,27 +40,55 @@ const dynamicOrigins = [
 
 const allowedOrigins = Array.from(new Set([...staticAllowedOrigins, ...dynamicOrigins])).filter(Boolean);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, server-to-server)
-      if (!origin) return callback(null, true);
-      if (
-        allowedOrigins.includes(origin) ||
-        origin.endsWith('.vercel.app') ||
-        origin.endsWith('.netlify.app') ||
-        origin.endsWith('.onrender.com') ||
-        origin.includes('miudyojakhonarach.com')
-      ) {
-        return callback(null, true);
-      }
-      return callback(new Error(`CORS policy: origin ${origin} is not allowed`));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-key'],
-  })
-);
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // Server-to-server, curl, Postman, mobile apps
+
+  // Direct origin list match
+  if (allowedOrigins.includes(origin)) return true;
+
+  // Localhost (any port: 5173, 5174, 3000, 4173 preview, etc.)
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+
+  // Production & preview cloud hosts
+  if (
+    origin.endsWith('.vercel.app') ||
+    origin.endsWith('.netlify.app') ||
+    origin.endsWith('.onrender.com') ||
+    origin.endsWith('.koyeb.app') ||
+    origin.endsWith('.railway.app') ||
+    origin.includes('miudyojakhonarach.com')
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (isOriginAllowed(origin)) {
+      return callback(null, true);
+    }
+    console.warn(`[CORS Blocked]: Origin "${origin}" rejected by policy.`);
+    return callback(new Error(`CORS policy: origin ${origin} is not allowed`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'x-admin-key',
+    'Accept',
+    'X-Requested-With',
+    'Cache-Control',
+    'Pragma',
+  ],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400, // 24-hour preflight cache for instant subsequent requests
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 
 // Body parsing with safe size limit
 app.use(express.json({ limit: '100kb' }));
