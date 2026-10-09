@@ -38,8 +38,8 @@ export async function createEnquiry(req, res, next) {
 
     const enquiry = await Enquiry.create(controlledPayload);
 
-    // Asynchronously dispatch notifications (do not block client response)
-    Promise.allSettled([
+    // Dispatch notifications and wait for SMTP transmission to complete before closing response
+    await Promise.allSettled([
       sendEnquiryAdminEmail(enquiry),
       sendEnquiryUserEmail(enquiry),
     ]).then((results) => {

@@ -238,9 +238,7 @@ function renderEmailShell({ logoSrc, badgeText, badgeColor = '#E27500', badgeBg 
               <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #E2E8F0;">
                 <p style="margin: 0; font-size: 13px; color: #64748B;">Warm regards,</p>
                 <p style="margin: 4px 0 0 0; font-size: 15px; font-weight: 700; color: #0F172A;">Team Mi Udyojak Honarach</p>
-                <p style="margin: 2px 0 0 0; font-size: 13px; color: #E27500; font-weight: 600;">
-                  Movement Convener: Nilesh More
-                </p>
+                
               </div>
             </td>
           </tr>

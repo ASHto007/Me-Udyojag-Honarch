@@ -46,8 +46,8 @@ export async function createEventRegistration(req, res, next) {
 
     const registration = await EventRegistration.create(controlledPayload);
 
-    // Asynchronously dispatch notifications
-    Promise.allSettled([
+    // Dispatch notifications and wait for SMTP transmission to complete before closing response
+    await Promise.allSettled([
       sendEventAdminEmail(registration),
       sendEventUserEmail(registration),
     ]).then((results) => {
