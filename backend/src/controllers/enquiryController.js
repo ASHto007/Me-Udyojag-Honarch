@@ -38,22 +38,8 @@ export async function createEnquiry(req, res, next) {
 
     const enquiry = await Enquiry.create(controlledPayload);
 
-    // Dispatch notifications and wait for SMTP transmission to complete before closing response
-    await Promise.allSettled([
-      sendEnquiryAdminEmail(enquiry),
-      sendEnquiryUserEmail(enquiry),
-    ]).then((results) => {
-      const types = ['Admin notification', 'User confirmation'];
-      results.forEach((res, i) => {
-        if (res.status === 'rejected') {
-          console.error(`[Email Error - ${types[i]}]:`, res.reason?.message || res.reason);
-        } else {
-          console.log(`[Email Success - ${types[i]}]: Sent (messageId: ${res.value?.messageId || 'OK'})`);
-        }
-      });
-    }).catch((err) => console.error('[Email Dispatch Warning]:', err));
-
-    return res.status(201).json({
+    // Return 201 response immediately so user experiences instant (<100ms) submission
+    res.status(201).json({
       success: true,
       message: 'Your enquiry has been received successfully. Our team will contact you shortly.',
       data: {
@@ -61,6 +47,23 @@ export async function createEnquiry(req, res, next) {
         fullName: enquiry.fullName,
         createdAt: enquiry.createdAt,
       },
+    });
+
+    // Asynchronously dispatch notifications in background without blocking user
+    setImmediate(() => {
+      Promise.allSettled([
+        sendEnquiryAdminEmail(enquiry),
+        sendEnquiryUserEmail(enquiry),
+      ]).then((results) => {
+        const types = ['Admin notification', 'User confirmation'];
+        results.forEach((res, i) => {
+          if (res.status === 'rejected') {
+            console.error(`[Email Error - ${types[i]}]:`, res.reason?.message || res.reason);
+          } else {
+            console.log(`[Email Success - ${types[i]}]: Sent (messageId: ${res.value?.messageId || 'OK'})`);
+          }
+        });
+      }).catch((err) => console.error('[Email Dispatch Warning]:', err));
     });
   } catch (error) {
     next(error);
