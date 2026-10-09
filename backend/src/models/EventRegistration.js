@@ -82,15 +82,7 @@ const eventRegistrationSchema = new mongoose.Schema(
   }
 );
 
-// Compound unique indexes to prevent duplicate registrations for the same event
-eventRegistrationSchema.index(
-  { eventId: 1, email: 1 },
-  { unique: true, name: 'uniq_event_email' }
-);
-eventRegistrationSchema.index(
-  { eventId: 1, phone: 1 },
-  { unique: true, name: 'uniq_event_phone' }
-);
+// Index for listing registrations sorted by newest first
 eventRegistrationSchema.index({ eventId: 1, createdAt: -1 });
 
 export const EventRegistration = mongoose.model('EventRegistration', eventRegistrationSchema);

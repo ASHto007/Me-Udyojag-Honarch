@@ -29,22 +29,6 @@ export async function createEventRegistration(req, res, next) {
     const normalizedPhoneVal = normalizePhone(phone);
     const cleanEventId = stripHtml(eventId);
 
-    // Duplicate check prior to insert
-    const existingRegistration = await EventRegistration.findOne({
-      eventId: cleanEventId,
-      $or: [
-        { email: normalizedEmailVal },
-        { phone: normalizedPhoneVal },
-      ],
-    }).lean();
-
-    if (existingRegistration) {
-      return res.status(409).json({
-        success: false,
-        message: 'You have already registered for this event with this email or mobile number.',
-      });
-    }
-
     const controlledPayload = {
       eventId: cleanEventId,
       eventTitle: stripHtml(eventTitle),
@@ -90,13 +74,6 @@ export async function createEventRegistration(req, res, next) {
       },
     });
   } catch (error) {
-    // If caught by MongoDB compound unique index concurrently
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: 'You have already registered for this event with this email or mobile number.',
-      });
-    }
     next(error);
   }
 }

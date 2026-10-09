@@ -195,16 +195,6 @@ export const swaggerSpec = {
               },
             },
           },
-          409: {
-            description: 'Duplicate registration (participant already registered for this event).',
-            content: {
-              'application/json': {
-                schema: {
-                  $ref: '#/components/schemas/ErrorResponse',
-                },
-              },
-            },
-          },
           429: {
             description: 'Rate limit exceeded.',
             content: {
