@@ -9,13 +9,39 @@ try {
   // Fallback gracefully if setServers is restricted
 }
 
+// Track connection lifecycle events once
+let listenersAttached = false;
+function setupConnectionListeners() {
+  if (listenersAttached) return;
+  listenersAttached = true;
+
+  mongoose.connection.on('error', (err) => {
+    console.error('[MongoDB Error]:', err.message || err);
+  });
+
+  mongoose.connection.on('disconnected', () => {
+    if (!config.isTest) {
+      console.warn('[MongoDB Warning]: Database connection disconnected. Attempting auto-reconnect...');
+    }
+  });
+
+  mongoose.connection.on('reconnected', () => {
+    if (!config.isTest) {
+      console.log('[MongoDB]: Database connection successfully re-established.');
+    }
+  });
+}
+
 /**
- * Connect to MongoDB instance using Mongoose.
+ * Connect to MongoDB instance using Mongoose with production connection pooling.
  * 
  * @param {string} [uri] - Optional MongoDB URI override (e.g. for testing)
+ * @param {number} [maxRetries=3]
  * @returns {Promise<typeof mongoose>}
  */
 export async function connectDB(uri = config.mongodbUri, maxRetries = 3) {
+  setupConnectionListeners();
+
   if (mongoose.connection.readyState === 1) {
     return mongoose;
   }
@@ -23,7 +49,9 @@ export async function connectDB(uri = config.mongodbUri, maxRetries = 3) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const conn = await mongoose.connect(uri, {
-        autoIndex: true,
+        autoIndex: !config.isProduction,
+        maxPoolSize: 50,
+        minPoolSize: 5,
         serverSelectionTimeoutMS: 15000,
         connectTimeoutMS: 15000,
         socketTimeoutMS: 45000,

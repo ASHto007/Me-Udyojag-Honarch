@@ -3,6 +3,7 @@ import { createEnquiry, getEnquiries } from '../controllers/enquiryController.js
 import { validateEnquiryInput } from '../validators/enquiryValidator.js';
 import { validateRequest } from '../middleware/validateRequest.js';
 import { submissionRateLimiter } from '../middleware/rateLimiter.js';
+import { requireAdminAuth } from '../middleware/adminAuth.js';
 
 const router = Router();
 
@@ -14,7 +15,7 @@ router.post(
   createEnquiry
 );
 
-// GET /api/enquiries - Future-ready admin listing
-router.get('/', getEnquiries);
+// GET /api/enquiries - Protected administrative listing
+router.get('/', requireAdminAuth, getEnquiries);
 
 export default router;

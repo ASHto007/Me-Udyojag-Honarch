@@ -1,0 +1,186 @@
+import React, { useState } from 'react';
+import { Award } from 'lucide-react';
+import './AccordionGallery.css';
+
+export interface MentorGalleryItem {
+  id?: string;
+  image: string;
+  imagePosition?: string;
+  imageShiftUp?: number;
+  imageScale?: number;
+  name: string;
+  role: string;
+  tag: string;
+  experience?: string;
+  description: string;
+  link?: string;
+  alt?: string;
+}
+
+export interface AccordionGalleryProps {
+  items: MentorGalleryItem[];
+  defaultIndex?: number;
+  accentColor?: string;
+  overlayColor?: string;
+  textColor?: string;
+  height?: number;
+  gap?: number;
+  radius?: number;
+  expandRatio?: number;
+  trigger?: 'hover' | 'click';
+  className?: string;
+}
+
+export const AccordionGallery: React.FC<AccordionGalleryProps> = ({
+  items,
+  defaultIndex = 0,
+  accentColor = '#E27500',
+  overlayColor = '#0B1320',
+  textColor = '#ffffff',
+  height = 540,
+  gap = 12,
+  radius = 24,
+  expandRatio = 0.54,
+  trigger = 'hover',
+  className = ''
+}) => {
+  const count = items.length;
+  const [active, setActive] = useState<number>(Math.min(Math.max(defaultIndex, 0), count - 1));
+
+  const handleEnter = (i: number) => {
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+      if (trigger === 'hover') setActive(i);
+    }
+  };
+
+  const handlePanelClick = (i: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActive(i);
+  };
+
+  const handleKeyDown = (i: number, e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActive((i + 1) % count);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActive((i - 1 + count) % count);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setActive(i);
+    }
+  };
+
+  return (
+    <div className="accordion-gallery-wrapper">
+      <div
+        className={`accordion-gallery ${className}`.trim()}
+        style={{
+          // @ts-expect-error CSS custom properties
+          '--ag-accent': accentColor,
+          '--ag-overlay': overlayColor,
+          '--ag-text': textColor,
+          '--ag-gap': `${gap}px`,
+          '--ag-radius': `${radius}px`,
+          '--ag-expand-grow': `${(expandRatio * (count - 1)) / (1 - expandRatio)}`,
+          height: `${height}px`
+        }}
+        role="list"
+        aria-label="Mentors Interactive Gallery"
+      >
+        {items.map((item, i) => {
+          const isActive = i === active;
+          const tiltDeg = isActive ? 0 : i < active ? 3 : -3;
+
+          return (
+            <div
+              key={item.id || i}
+              className={`ag-panel ${isActive ? 'ag-panel--active' : ''}`}
+              style={{
+                borderRadius: `${radius}px`,
+                transform: `perspective(1200px) rotateY(${tiltDeg}deg)`
+              }}
+              onClick={(e) => handlePanelClick(i, e)}
+              onMouseEnter={() => handleEnter(i)}
+              onFocus={() => setActive(i)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              role="listitem"
+              tabIndex={0}
+              aria-current={isActive ? 'true' : undefined}
+              aria-label={`${item.name} - ${item.role}`}
+            >
+              {/* Mentor Photo Container */}
+              <span className="ag-panel__frame">
+                <span className="ag-panel__media">
+                  <img
+                    src={item.image}
+                    alt={item.alt || item.name}
+                    style={{
+                      objectPosition: item.imagePosition ?? 'center top',
+                    }}
+                    draggable="false"
+                    loading="lazy"
+                  />
+                </span>
+                <span className="ag-panel__overlay" aria-hidden="true" />
+              </span>
+
+              {/* Mentor Info Layer */}
+              <div className="ag-panel__label" aria-hidden="true">
+                {/* Tag / Specialization */}
+                <div className="ag-panel__tag-wrapper">
+                  <span className="ag-panel__tag">
+                    <Award className="w-3 h-3 text-[#E27500]" />
+                    <span>{item.tag}</span>
+                  </span>
+                  {item.experience && (
+                    <span className="ag-panel__exp-badge">
+                      {item.experience}
+                    </span>
+                  )}
+                </div>
+
+                {/* Mentor Name Header */}
+                <div className="ag-panel__header">
+                  <span className="ag-panel__bar" />
+                  <div className="flex flex-col">
+                    <span className="ag-panel__text">
+                      {item.name}
+                    </span>
+                    <span className="ag-panel__role">
+                      {item.role}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Detailed Bio / Guidance Info on Expand */}
+                {item.description ? (
+                  <p className="ag-panel__subtext">
+                    {item.description}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Mobile Swipe Indicators */}
+      <div className="mobile-dots flex sm:hidden items-center justify-center gap-2 mt-4">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setActive(i)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              active === i ? 'w-6 bg-[#E27500]' : 'bg-white/20'
+            }`}
+            aria-label={`Go to slide ${i + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default AccordionGallery;

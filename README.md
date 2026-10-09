@@ -82,9 +82,6 @@ mi-udyojak-honarach/
 │   │   │   └── sanitize.js      # HTML & XSS sanitization
 │   │   ├── app.js               # Express application configuration
 │   │   └── server.js            # HTTP server bootstrap & graceful shutdown
-│   ├── tests/
-│   │   ├── enquiry.test.js      # Integration test suite for enquiries
-│   │   └── eventRegistration.test.js # Integration test suite for registrations
 │   ├── .env.example
 │   ├── package.json
 │   └── README.md
@@ -125,45 +122,82 @@ Frontend runs at `http://localhost:5173`.
 
 ## 📡 REST API Specifications
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/docs` | **Interactive Swagger UI API Documentation** |
-| `GET` | `/api/docs.json` | OpenAPI 3.0 JSON specification schema |
-| `GET` | `/api/health` | Healthcheck and database connectivity diagnostic |
-| `POST` | `/api/enquiries` | Submit general business / membership inquiry |
-| `GET` | `/api/enquiries` | Administrative pagination list of enquiries |
-| `POST` | `/api/event-registrations` | Register interest for upcoming conclave / event |
-| `GET` | `/api/event-registrations` | Administrative pagination list of event registrations |
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/docs` | Interactive Swagger UI API Documentation | Public |
+| `GET` | `/api/docs.json` | OpenAPI 3.0 JSON specification schema | Public |
+| `GET` | `/api/health` | Readiness & health check (200 / 503) | Public |
+| `GET` | `/api/health/live` | Container liveness probe | Public |
+| `GET` | `/api/health/ready` | Traffic readiness probe | Public |
+| `POST` | `/api/enquiries` | Submit general business / membership inquiry | Public (Rate-limited) |
+| `GET` | `/api/enquiries` | Administrative paginated list of enquiries | `x-admin-key` or `Bearer <key>` |
+| `POST` | `/api/event-registrations` | Register interest for upcoming conclave / event | Public (Rate-limited) |
+| `GET` | `/api/event-registrations` | Administrative paginated list of event registrations | `x-admin-key` or `Bearer <key>` |
 
 ---
 
-## 🧪 Verification & Tests
+## 🧪 Verification & Production Readiness
 
-### Backend Test Suite
+### Backend Syntax Verification
 ```bash
-cd backend
-npm test
+node --check backend/src/server.js
 ```
-- Tests 12/12 passing: healthchecks, OpenAPI/Swagger specification, input validation, duplicate event registration conflict (`409 Conflict`), and record persistence.
 
-### Frontend Production Build
+### Frontend Quality & Production Build
 ```bash
-cd frontend
-npm run build
+# Typecheck
+npm run typecheck --workspace=frontend
+
+# Linting
+npm run lint --workspace=frontend
+
+# Production bundle compilation
+npm run build:frontend
 ```
-- Compiles production Vite client bundle into `frontend/dist/`.
 
 ---
 
-## 🚢 Deployment Architecture
+## 🐳 Docker & Container Deployment
 
-- **Frontend**: Deployed to **Vercel**
-  - Root directory: `frontend`
-  - Build command: `npm run build`
-  - Output directory: `dist`
-  - Environment variable: `VITE_API_URL=https://api.yourdomain.com/api`
-- **Backend**: Deployed to **Render / Railway**
-  - Root directory: `backend`
-  - Start command: `npm start`
-  - Environment variables: `NODE_ENV=production`, `MONGODB_URI=<Atlas URI>`, `FRONTEND_URL=https://yourdomain.com`, `SMTP_*`
-- **Database**: **MongoDB Atlas**
+### Local / Self-Hosted VPS (Docker Compose)
+Launch both backend and MongoDB with persistent data and healthchecks:
+```bash
+docker compose up -d --build
+```
+- Backend will be available at `http://localhost:5000`
+- MongoDB will be available with persisted storage in named volume `mongo-data`
+
+---
+
+## 🚀 CI / CD Pipeline
+
+Automated GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push and pull request to `main`:
+1. **Frontend Job**: Runs TypeScript typecheck, Oxlint, and production Vite bundle build.
+2. **Backend Job**: Performs Node.js syntax verification and dependency validation.
+
+---
+
+## 🚢 Cloud Production Deployment
+
+### Frontend (Vercel / Netlify / Cloudflare Pages)
+- **Root Directory**: `frontend`
+- **Framework Preset**: Vite
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_URL`: `https://api.miudyojakhonarach.com/api` (or your backend domain)
+
+### Backend (Render / Railway / AWS / Docker VPS)
+- **Root Directory**: `backend`
+- **Runtime**: Node.js 20 LTS (or Dockerfile)
+- **Start Command**: `npm start`
+- **Environment Variables**:
+  - `NODE_ENV`: `production`
+  - `PORT`: `5000` (or assigned port)
+  - `MONGODB_URI`: `mongodb+srv://<user>:<password>@cluster0.mongodb.net/mi_udyojak?retryWrites=true&w=majority`
+  - `FRONTEND_URL`: `https://miudyojakhonarach.com`
+  - `ADMIN_API_KEY`: `<secure_random_hex_key>`
+  - `ADMIN_EMAIL`: `miudyojakhonarch@gmail.com`
+  - `EMAIL_FROM`: `"Mi Udyojak Honarach" <miudyojakhonarch@gmail.com>`
+  - `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` (e.g. Brevo, SendGrid, Amazon SES)
+

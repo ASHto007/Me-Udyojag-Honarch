@@ -27,12 +27,14 @@ app.use(compression());
 const allowedOrigins = Array.from(
   new Set([
     config.frontendUrl,
+    config.frontendUrl.replace('://', '://www.'),
+    config.frontendUrl.replace('://www.', '://'),
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:3000',
     ...(config.allowedOrigins || []),
   ])
-);
+).filter(Boolean);
 
 app.use(
   cors({
@@ -50,7 +52,7 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-admin-key'],
   })
 );
 
@@ -68,10 +70,15 @@ app.get('/api/docs.json', (_req, res) => {
   res.send(swaggerSpec);
 });
 
-// API Route mounts
+// API Route mounts (primary /api/* plus root /* fallback aliases for resilient client requests)
 app.use('/api/health', healthRoutes);
+app.use('/health', healthRoutes);
+
 app.use('/api/enquiries', enquiryRoutes);
+app.use('/enquiries', enquiryRoutes);
+
 app.use('/api/event-registrations', eventRegistrationRoutes);
+app.use('/event-registrations', eventRegistrationRoutes);
 
 // Root informational endpoint
 app.get('/', (_req, res) => {

@@ -34,9 +34,16 @@ const eventRegistrationSchema = new mongoose.Schema(
     },
     businessName: {
       type: String,
+      required: [true, 'Business or organization name is required'],
       trim: true,
+      minlength: [2, 'Business name must be at least 2 characters'],
       maxlength: [150, 'Business name cannot exceed 150 characters'],
-      default: '',
+    },
+    netWorth: {
+      type: String,
+      required: [true, 'Business turnover or net worth is required'],
+      trim: true,
+      maxlength: [100, 'Net worth cannot exceed 100 characters'],
     },
     cityDistrict: {
       type: String,
@@ -47,9 +54,10 @@ const eventRegistrationSchema = new mongoose.Schema(
     },
     message: {
       type: String,
+      required: [true, 'Please share details about your business and why you want to join'],
       trim: true,
+      minlength: [10, 'Please write at least 10 characters about your business and goals'],
       maxlength: [2000, 'Message cannot exceed 2000 characters'],
-      default: '',
     },
     consent: {
       type: Boolean,
@@ -65,8 +73,8 @@ const eventRegistrationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['confirmed', 'waitlisted', 'cancelled'],
-      default: 'confirmed',
+      enum: ['pending', 'confirmed', 'waitlisted', 'cancelled'],
+      default: 'pending',
     },
   },
   {

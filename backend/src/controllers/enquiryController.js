@@ -42,7 +42,16 @@ export async function createEnquiry(req, res, next) {
     Promise.allSettled([
       sendEnquiryAdminEmail(enquiry),
       sendEnquiryUserEmail(enquiry),
-    ]).catch((err) => console.error('[Email Dispatch Warning]:', err));
+    ]).then((results) => {
+      const types = ['Admin notification', 'User confirmation'];
+      results.forEach((res, i) => {
+        if (res.status === 'rejected') {
+          console.error(`[Email Error - ${types[i]}]:`, res.reason?.message || res.reason);
+        } else {
+          console.log(`[Email Success - ${types[i]}]: Sent (messageId: ${res.value?.messageId || 'OK'})`);
+        }
+      });
+    }).catch((err) => console.error('[Email Dispatch Warning]:', err));
 
     return res.status(201).json({
       success: true,

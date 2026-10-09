@@ -6,6 +6,7 @@ import {
 import { validateEventRegistrationInput } from '../validators/eventRegistrationValidator.js';
 import { validateRequest } from '../middleware/validateRequest.js';
 import { submissionRateLimiter } from '../middleware/rateLimiter.js';
+import { requireAdminAuth } from '../middleware/adminAuth.js';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ router.post(
   createEventRegistration
 );
 
-// GET /api/event-registrations - Future-ready admin listing
-router.get('/', getEventRegistrations);
+// GET /api/event-registrations - Protected administrative listing
+router.get('/', requireAdminAuth, getEventRegistrations);
 
 export default router;

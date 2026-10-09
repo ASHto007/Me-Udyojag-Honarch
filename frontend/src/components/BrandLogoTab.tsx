@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export const BrandLogoTab: React.FC = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 120);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -9,7 +19,9 @@ export const BrandLogoTab: React.FC = () => {
   return (
     <aside
       aria-label="Brand Navigation"
-      className="fixed top-0 left-4 sm:left-8 lg:left-12 z-40 pointer-events-auto"
+      className={`fixed top-0 left-4 sm:left-8 lg:left-12 z-40 transition-all duration-300 ${
+        isScrolled ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100 pointer-events-auto'
+      }`}
     >
       <a
         href="#top"

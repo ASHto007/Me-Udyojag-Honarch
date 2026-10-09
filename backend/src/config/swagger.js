@@ -10,7 +10,7 @@ export const swaggerSpec = {
       'Production-grade RESTful API documentation for the Mi Udyojak Honarach (मी उद्योजक होणारच) full-stack web platform.\n\nHandles membership enquiries, event participant registrations, duplicate protection, and automated notifications.',
     contact: {
       name: 'Mi Udyojak Honarach Support',
-      email: 'admin@miudyojakhonarach.com',
+      email: 'miudyojakhonarch@gmail.com',
       url: 'https://miudyojakhonarach.com',
     },
     license: {
@@ -394,7 +394,7 @@ export const swaggerSpec = {
       },
       EventRegistrationInput: {
         type: 'object',
-        required: ['eventId', 'eventTitle', 'fullName', 'email', 'phone', 'cityDistrict', 'consent'],
+        required: ['eventId', 'eventTitle', 'fullName', 'email', 'phone', 'businessName', 'netWorth', 'cityDistrict', 'message', 'consent'],
         properties: {
           eventId: {
             type: 'string',
@@ -419,24 +419,26 @@ export const swaggerSpec = {
             type: 'string',
             example: '9822012345',
           },
+          businessName: {
+            type: 'string',
+            minLength: 2,
+            maxLength: 150,
+            example: 'Sahyadri Agro Solutions',
+          },
+          netWorth: {
+            type: 'string',
+            maxLength: 100,
+            example: '₹100+ Cr',
+          },
           cityDistrict: {
             type: 'string',
             example: 'Pune',
           },
-          attendeeType: {
+          message: {
             type: 'string',
-            enum: ['Entrepreneur', 'Aspiring Entrepreneur', 'Student', 'Professional', 'Other'],
-            example: 'Entrepreneur',
-          },
-          organization: {
-            type: 'string',
-            maxLength: 150,
-            example: 'Sahyadri Agro Solutions',
-          },
-          notes: {
-            type: 'string',
-            maxLength: 1000,
-            example: 'Interested in B2B vendor stalls.',
+            minLength: 10,
+            maxLength: 2000,
+            example: 'Manufacturer of drip irrigation systems looking to expand dealer network and connect with corporate mentors.',
           },
           consent: {
             type: 'boolean',

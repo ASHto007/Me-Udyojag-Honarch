@@ -34,8 +34,8 @@ NODE_ENV=development
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/mi-udyojak-honarach
 FRONTEND_URL=http://localhost:5173
-ADMIN_EMAIL=admin@miudyojakhonarach.com
-EMAIL_FROM="Mi Udyojak Honarach <noreply@miudyojakhonarach.com>"
+ADMIN_EMAIL=miudyojakhonarch@gmail.com
+EMAIL_FROM="Mi Udyojak Honarach <miudyojakhonarch@gmail.com>"
 SMTP_HOST=smtp.mailgun.org
 SMTP_PORT=587
 SMTP_USER=your_smtp_user
@@ -51,11 +51,6 @@ npm run dev
 Production mode:
 ```bash
 npm start
-```
-
-### 4. Run Test Suite
-```bash
-npm test
 ```
 
 ---

@@ -9,19 +9,21 @@ interface SubmissionResult {
 }
 import { SectionBackdrop } from './SectionBackdrop';
 import React, { useState, useRef } from 'react';
-import { Send, Info } from 'lucide-react';
+import { Send, CheckCircle2, AlertCircle, Mail, Phone } from 'lucide-react';
+
+const INITIAL_FORM_DATA = {
+  fullName: '',
+  phone: '',
+  email: '',
+  city: '',
+  stage: 'Aspiring Entrepreneur (Idea Stage)',
+  interest: 'Mentorship & Guidance (Service 03)',
+  message: '',
+  consent: false,
+};
 
 export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTACT_ENDPOINT }) => {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    email: '',
-    city: '',
-    stage: 'Aspiring Entrepreneur (Idea Stage)',
-    interest: 'Mentorship & Guidance (Service 03)',
-    message: '',
-    consent: false,
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
   const [result, setResult] = useState<SubmissionResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,7 +69,12 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
     setValidationErrors({});
     pendingRef.current = true;
     setIsSubmitting(true);
-    setResult(await submitEnquiry(formData, endpoint));
+    const submissionResult = await submitEnquiry(formData, endpoint);
+    setResult(submissionResult);
+    if (submissionResult.success) {
+      setFormData(INITIAL_FORM_DATA);
+      setValidationErrors({});
+    }
     pendingRef.current = false;
     setIsSubmitting(false);
   };
@@ -89,6 +96,33 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
               Whether you have an idea in your head, an artisanal product in your home, or an early-stage venture ready to scale, join our community of aspiring Maharashtra entrepreneurs.
             </p>
 
+            {/* Official Contact Box */}
+            <div className="p-5 rounded-2xl bg-[#FCFBF9] border border-[#EAEAEA] shadow-2xs space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#E27500]">
+                <Mail className="w-4 h-4 text-[#E27500]" />
+                <span>Direct Official Contact</span>
+              </div>
+              <p className="text-xs text-[#6D6D6D] leading-relaxed">
+                For office communication, sponsorship, or conclave inquiries:
+              </p>
+              <div className="space-y-2 pt-0.5">
+                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-bold text-[#111827]">
+                  <Phone className="w-3.5 h-3.5 text-[#E27500] shrink-0" />
+                  <a href="tel:+917400119436" className="hover:text-[#E27500] transition-colors">
+                    +91 74001 19436
+                  </a>
+                </div>
+                <div className="flex items-center gap-2.5 text-xs sm:text-sm font-bold text-[#111827]">
+                  <Mail className="w-3.5 h-3.5 text-[#E27500] shrink-0" />
+                  <a
+                    href="mailto:miudyojakhonarch@gmail.com"
+                    className="hover:text-[#E27500] transition-colors"
+                  >
+                    miudyojakhonarch@gmail.com
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Right Column: Registration Form */}
@@ -96,7 +130,25 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
             <div className="bg-[#FCFBF9] rounded-3xl p-6 sm:p-10 border border-[#EAEAEA] shadow-lg">
               
               {!endpoint && <p role="status" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><strong>Form preview.</strong> {PREVIEW_MESSAGE}</p>}
-              {result && <p role={result.success ? 'status' : 'alert'} className="mb-5 rounded-xl border border-[#EAEAEA] bg-white p-4 text-sm text-[#4B5563]"><Info className="inline h-4 w-4 mr-2" />{result.message}</p>}
+              {result && (
+                <div
+                  role={result.success ? 'status' : 'alert'}
+                  className={`mb-5 rounded-2xl border p-4 text-sm flex items-start gap-3 shadow-2xs transition-all ${
+                    result.success
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+                      : 'border-red-200 bg-red-50 text-red-900'
+                  }`}
+                >
+                  {result.success ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1 text-xs sm:text-sm font-semibold leading-relaxed">
+                    {result.message}
+                  </div>
+                </div>
+              )}
                 <form onSubmit={handleSubmit} noValidate className="space-y-5">
                   <div>
                     <h3 className="text-xl font-bold text-[#111827]">

@@ -8,9 +8,10 @@ export interface EventRegistrationPayload {
   fullName: string;
   phone: string;
   email: string;
-  businessName?: string;
+  businessName: string;
+  netWorth: string;
   cityDistrict: string;
-  message?: string;
+  message: string;
   consent: boolean;
 }
 
@@ -42,7 +43,7 @@ export async function registerForEvent(
     errors.fullName = 'Full Name is required.';
   }
 
-  const digits = payload.phone.replace(/\D/g, '');
+  const digits = payload.phone?.replace(/\D/g, '') || '';
   if (!(digits.length === 10 || (digits.length === 12 && digits.startsWith('91')))) {
     errors.phone = 'Please enter a valid 10-digit mobile number.';
   }
@@ -53,8 +54,20 @@ export async function registerForEvent(
     errors.email = 'Please provide a valid email address.';
   }
 
+  if (!payload.businessName || payload.businessName.trim().length < 2) {
+    errors.businessName = 'Business or organization name is required.';
+  }
+
+  if (!payload.netWorth || !payload.netWorth.trim()) {
+    errors.netWorth = 'Business turnover / net worth is required.';
+  }
+
   if (!payload.cityDistrict || payload.cityDistrict.trim().length < 2) {
     errors.cityDistrict = 'City / District is required.';
+  }
+
+  if (!payload.message || payload.message.trim().length < 10) {
+    errors.message = 'Please share details about your business and why you want to join (at least 10 characters).';
   }
 
   if (!payload.consent) {
@@ -75,7 +88,7 @@ export async function registerForEvent(
     return {
       success: true,
       isPreview: false,
-      message: response.message || `We received your interest in ${payload.eventTitle.trim()}.`,
+      message: response.message || `Registration request submitted for ${payload.eventTitle.trim()}. Your request has been sent for admin review. Once approved, you will receive a confirmation email.`,
       data: response.data,
     };
   } catch (error) {

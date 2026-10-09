@@ -28,6 +28,7 @@ export const GALLERY_ITEMS: GalleryItemDto[] = [
     },
     {
       id: 'startup-felicitation',
+      eventId: 'youth-awards-conclave-2020',
       image: {
         url: '/assets/orbit-2.webp',
         alt: 'Indian Startup Founder Felicitation and Honors Ceremony'
@@ -70,6 +71,7 @@ export const GALLERY_ITEMS: GalleryItemDto[] = [
     },
     {
       id: 'gmec-2018',
+      eventId: 'gmec-2018',
       image: {
         url: '/assets/hero-workshop.webp',
         alt: 'Global Marathi Entrepreneurship Conclave at Taj Mahal Palace, Mumbai'

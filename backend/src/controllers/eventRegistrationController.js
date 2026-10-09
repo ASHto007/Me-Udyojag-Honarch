@@ -19,6 +19,7 @@ export async function createEventRegistration(req, res, next) {
       email,
       phone,
       businessName,
+      netWorth,
       cityDistrict,
       message,
       consent,
@@ -51,11 +52,12 @@ export async function createEventRegistration(req, res, next) {
       email: normalizedEmailVal,
       phone: normalizedPhoneVal,
       businessName: stripHtml(businessName) || '',
+      netWorth: stripHtml(netWorth) || '',
       cityDistrict: stripHtml(cityDistrict),
       message: stripHtml(message) || '',
       consent: Boolean(consent),
       ip: req.ip || req.headers['x-forwarded-for'] || '',
-      status: 'confirmed',
+      status: 'pending',
     };
 
     const registration = await EventRegistration.create(controlledPayload);
@@ -64,16 +66,26 @@ export async function createEventRegistration(req, res, next) {
     Promise.allSettled([
       sendEventAdminEmail(registration),
       sendEventUserEmail(registration),
-    ]).catch((err) => console.error('[Event Email Dispatch Warning]:', err));
+    ]).then((results) => {
+      const types = ['Admin event notification', 'User event confirmation'];
+      results.forEach((res, i) => {
+        if (res.status === 'rejected') {
+          console.error(`[Event Email Error - ${types[i]}]:`, res.reason?.message || res.reason);
+        } else {
+          console.log(`[Event Email Success - ${types[i]}]: Sent (messageId: ${res.value?.messageId || 'OK'})`);
+        }
+      });
+    }).catch((err) => console.error('[Event Email Dispatch Warning]:', err));
 
     return res.status(201).json({
       success: true,
-      message: `Registration confirmed for ${registration.eventTitle}.`,
+      message: `Registration request submitted for ${registration.eventTitle}. Your request has been sent for admin review. Once approved, you will receive a confirmation email.`,
       data: {
         id: registration._id,
         eventId: registration.eventId,
         eventTitle: registration.eventTitle,
         fullName: registration.fullName,
+        status: registration.status,
         createdAt: registration.createdAt,
       },
     });

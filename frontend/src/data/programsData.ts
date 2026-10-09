@@ -1,8 +1,8 @@
 /**
  * Core Programs & Services Data
  * 
- * Five structured initiatives to empower aspiring and emerging entrepreneurs.
- * Add or edit programs and their details here without touching the UI component.
+ * Five structured initiatives to empower aspiring and emerging entrepreneurs across Maharashtra.
+ * Updated with authentic event assets and rich, complete service metadata.
  */
 
 export interface ProgramItem {
@@ -14,9 +14,10 @@ export interface ProgramItem {
   whatItIs: string;
   whoItIsFor: string;
   benefit: string;
-  ctaText?: string;
+  highlights: string[];
   thumbnail: string;
-  gridSpan: string;
+  ctaText: string;
+  ctaLink?: string;
 }
 
 export const PROGRAMS_DATA: ProgramItem[] = [
@@ -26,63 +27,88 @@ export const PROGRAMS_DATA: ProgramItem[] = [
     iconName: 'Network',
     title: 'Networking Events & Forums',
     marathiTitle: 'व्यावसायिक नेटवर्किंग आणि परिसंवाद',
-    gridSpan: 'md:col-span-2 md:row-span-2',
-    thumbnail: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=900&q=80&fit=crop',
-    whatItIs: 'High-impact district meetups, business conclaves, and founder networking roundtables across Maharashtra.',
+    thumbnail: '/assets/gallery-1.webp',
+    whatItIs: 'High-impact district conclaves, B2B exchange roundtables, and monthly entrepreneur meetups across Maharashtra.',
     whoItIsFor: 'Aspiring entrepreneurs, early-stage founders, and established MSME leaders seeking peer connections.',
     benefit: 'Direct introductions, peer collaboration, and strategic regional supply chain partnerships.',
-    ctaText: 'Join Networking Forum'
+    highlights: [
+      'Active district chapters in Mumbai, Pune, Nashik & Chh. Sambhajinagar',
+      'Structured B2B matchmaking & peer referral circles',
+      'Founder roundtables with veteran industry leaders'
+    ],
+    ctaText: 'Join Networking Forum',
+    ctaLink: '#contact'
   },
   {
     id: 2,
     num: '02',
     iconName: 'Megaphone',
-    title: 'Business Promotion',
+    title: 'Business Promotion & Visibility',
     marathiTitle: 'व्यवसाय प्रसिद्धी आणि व्यासपीठ',
-    gridSpan: 'md:col-span-1 md:row-span-1',
-    thumbnail: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=600&q=80&fit=crop',
-    whatItIs: 'Curated exhibitions, product showcases, digital directories, and business feature spotlights.',
-    whoItIsFor: 'Homegrown producers, artisans, and regional brands aiming to scale their customer reach.',
-    benefit: 'Statewide commercial visibility, direct consumer access, and customer acquisition.',
-    ctaText: 'Enquire for Promotion'
+    thumbnail: '/assets/orbit-1.webp',
+    whatItIs: 'Curated trade exhibitions, product showcases, social video spotlights, and verified business directory features.',
+    whoItIsFor: 'Homegrown producers, agro-processors, D2C brands, and regional manufacturers scaling statewide.',
+    benefit: 'Statewide commercial visibility, customer acquisition, and enhanced brand credibility.',
+    highlights: [
+      'Commercial stalls & product showcases at flagship annual conclaves',
+      'Digital video spotlights reaching 100K+ Maharashtra community',
+      'Verified listing in the Marathi Udyojak Business Directory'
+    ],
+    ctaText: 'Promote Your Business',
+    ctaLink: '#contact'
   },
   {
     id: 3,
     num: '03',
     iconName: 'GraduationCap',
-    title: 'Mentorship',
+    title: '1-on-1 Mentorship & Advisory',
     marathiTitle: 'अनुभवी उद्योजकांचे मार्गदर्शन',
-    gridSpan: 'md:col-span-1 md:row-span-1',
-    thumbnail: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600&q=80&fit=crop',
-    whatItIs: 'Structured guidance from experienced industry veterans in operations, finance, and marketing.',
-    whoItIsFor: 'First-generation business creators needing realistic problem-solving and strategic advisory.',
-    benefit: 'Practical insights that reduce startup errors, streamline cash-flow, and accelerate growth.',
-    ctaText: 'Connect with a Mentor'
+    thumbnail: '/assets/orbit-3.webp',
+    whatItIs: 'Personalized guidance from veteran industrialists in shop-floor operations, capital subsidies, and modern distribution.',
+    whoItIsFor: 'First-generation entrepreneurs with business ideas and growth-stage manufacturers facing operational bottlenecks.',
+    benefit: 'Practical insights that reduce startup errors, streamline working capital, and accelerate scale.',
+    highlights: [
+      'Direct advisory from 20+ years experienced industry titans',
+      'Working capital syndication, CGTMSE loans & subsidy roadmap',
+      'Lean manufacturing, factory compliance & distribution scaling'
+    ],
+    ctaText: 'Connect with a Mentor',
+    ctaLink: '#mentors'
   },
   {
     id: 4,
     num: '04',
     iconName: 'Award',
-    title: 'Awards & Recognition',
+    title: 'Awards & Grassroots Recognition',
     marathiTitle: 'उद्योजक सन्मान आणि पुरस्कार',
-    gridSpan: 'md:col-span-1 md:row-span-1',
-    thumbnail: 'https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=600&q=80&fit=crop',
-    whatItIs: 'Felicitation programs and honors celebrating verified grassroots entrepreneurial achievements.',
-    whoItIsFor: 'Standout business innovators, resilient manufacturers, and community enterprise creators.',
-    benefit: 'Third-party credibility, industry recognition, and inspiring regional role-model visibility.',
-    ctaText: 'Learn About Honors'
+    thumbnail: '/assets/hero-award-refined.webp',
+    whatItIs: 'Felicitation programs and prestigious honors celebrating verified grassroots milestones and innovative manufacturers.',
+    whoItIsFor: 'Resilient manufacturers, innovative startup creators, women entrepreneurs, and community enterprise builders.',
+    benefit: 'Third-party credibility, prominent media recognition, and inspiring regional role-model visibility.',
+    highlights: [
+      'Felicitation on stage at the National Stock Exchange (NSE) Conclave',
+      'Regional print media dispatch and video documentary coverage',
+      'Inspirational entrepreneur case study featured in movement archives'
+    ],
+    ctaText: 'Learn About Honors',
+    ctaLink: '#contact'
   },
   {
     id: 5,
     num: '05',
     iconName: 'Handshake',
-    title: 'Collaborations',
+    title: 'Institutional Collaborations',
     marathiTitle: 'संस्थात्मक आणि व्यावसायिक सहयोग',
-    gridSpan: 'md:col-span-2 md:row-span-1',
-    thumbnail: 'https://images.unsplash.com/photo-1556761175-4b46a572b786?w=900&q=80&fit=crop',
-    whatItIs: 'Strategic alliances bridging local entrepreneurs with industry associations and institutional partners.',
-    whoItIsFor: 'Enterprises seeking institutional tie-ups, B2B procurement links, and shared infrastructure.',
+    thumbnail: '/assets/orbit-4.webp',
+    whatItIs: 'Strategic alliances bridging local entrepreneurs with industry associations, chambers of commerce, and institutional partners.',
+    whoItIsFor: 'Growing enterprises seeking institutional tie-ups, B2B procurement links, and shared infrastructure.',
     benefit: 'High-leverage relationships, commercial joint ventures, and sustainable long-term scale.',
-    ctaText: 'Explore Collaborations'
+    highlights: [
+      'Direct linkage with trade bodies & corporate vendor onboarding desks',
+      'Collaborative export consortia, shared logistics & warehousing',
+      'MoU frameworks for sustainable inter-enterprise regional trade'
+    ],
+    ctaText: 'Explore Collaborations',
+    ctaLink: '#contact'
   }
 ];

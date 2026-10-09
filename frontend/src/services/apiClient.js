@@ -6,10 +6,20 @@
  * and formats standardized application responses/errors.
  */
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api')
-).replace(/\/+$/, '');
+function resolveBaseUrl() {
+  const raw = (
+    import.meta.env.VITE_API_URL ||
+    (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api')
+  ).trim().replace(/\/+$/, '');
+
+  // If a full domain/URL was provided without the '/api' prefix, append it automatically
+  if (raw && !raw.endsWith('/api')) {
+    return `${raw}/api`;
+  }
+  return raw;
+}
+
+const API_BASE_URL = resolveBaseUrl();
 
 export class ApiError extends Error {
   constructor(message, status = 500, data = null) {
@@ -51,6 +61,15 @@ export async function apiRequest(endpoint, options = {}) {
     const contentType = response.headers.get('content-type') || '';
     const isJson = contentType.includes('application/json');
     const data = isJson ? await response.json() : await response.text();
+
+    // Guard against SPA fallback pages (e.g. index.html returned with HTTP 200 by static hosting)
+    if (!isJson && typeof data === 'string' && data.trim().toLowerCase().startsWith('<!doctype')) {
+      throw new ApiError(
+        'API endpoint unreachable: received HTML response instead of JSON. Please verify backend server URL in VITE_API_URL.',
+        502,
+        null
+      );
+    }
 
     if (!response.ok) {
       const message = (isJson && data?.message)

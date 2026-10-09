@@ -1,15 +1,10 @@
 import React, { useState } from 'react';
-import { MessageCircle, Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
-import { PUBLIC_CONTACT, whatsappUrl } from '../data/publicContact';
+import { Mail, Phone, MapPin } from 'lucide-react';
+import { PUBLIC_CONTACT } from '../data/publicContact';
 import { LegalModal } from './LegalModal';
 
 export const Footer: React.FC = () => {
   const [legalModal, setLegalModal] = useState<'privacy' | 'terms' | null>(null);
-
-  const defaultWhatsappMsg = encodeURIComponent('नमस्कार, मला ‘मी उद्योजक होणारच’ उपक्रमाबद्दल अधिक माहिती हवी आहे.');
-  const whatsappHref = PUBLIC_CONTACT.whatsapp
-    ? (whatsappUrl(PUBLIC_CONTACT.whatsapp) || `https://api.whatsapp.com/send?text=${defaultWhatsappMsg}`)
-    : `https://api.whatsapp.com/send?text=${defaultWhatsappMsg}`;
 
   return (
     <footer className="w-full bg-[#0D1520] text-white pt-16 pb-28 sm:pb-16 border-t border-gray-800">
@@ -41,7 +36,8 @@ export const Footer: React.FC = () => {
               An entrepreneurial guidance movement founded by Nilesh More, inspiring aspiring founders to develop confidence, determination, and enterprise acumen across Maharashtra.
             </p>
 
-            {/* Direct WhatsApp CTA Button */}
+            {/* Direct WhatsApp CTA Button - hidden as requested */}
+            {/*
             <div className="pt-2">
               <a
                 href={whatsappHref}
@@ -55,6 +51,7 @@ export const Footer: React.FC = () => {
                 <ExternalLink className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
               </a>
             </div>
+            */}
           </div>
 
           {/* Nav Anchors */}
@@ -67,7 +64,7 @@ export const Footer: React.FC = () => {
               <li><a href="#programs" className="hover:text-[#E27500] transition-colors">5 Core Services</a></li>
               <li><a href="#achievements" className="hover:text-[#E27500] transition-colors">Milestones</a></li>
               <li><a href="#community" className="hover:text-[#E27500] transition-colors">Events</a></li>
-              <li><a href="#stories" className="hover:text-[#E27500] transition-colors">Success Stories</a></li>
+              {/* <li><a href="#stories" className="hover:text-[#E27500] transition-colors">Success Stories</a></li> */}
               <li><a href="#mentors" className="hover:text-[#E27500] transition-colors">Mentors</a></li>
               <li><a href="#gallery" className="hover:text-[#E27500] transition-colors">Moments Gallery</a></li>
             </ul>
@@ -95,14 +92,24 @@ export const Footer: React.FC = () => {
             <div className="space-y-2.5 text-xs text-gray-300">
               {PUBLIC_CONTACT.phone && (
                 <div className="flex items-center gap-2 text-gray-300">
-                  <Phone className="w-3.5 h-3.5 text-[#E27500]" />
-                  <span>{PUBLIC_CONTACT.phone}</span>
+                  <Phone className="w-3.5 h-3.5 text-[#E27500] shrink-0" />
+                  <a
+                    href={`tel:${PUBLIC_CONTACT.phone.replace(/[\s-]+/g, '')}`}
+                    className="hover:text-[#FFB783] transition-colors"
+                  >
+                    {PUBLIC_CONTACT.phone}
+                  </a>
                 </div>
               )}
               {PUBLIC_CONTACT.email && (
                 <div className="flex items-center gap-2 text-gray-300">
-                  <Mail className="w-3.5 h-3.5 text-[#E27500]" />
-                  <span>{PUBLIC_CONTACT.email}</span>
+                  <Mail className="w-3.5 h-3.5 text-[#E27500] shrink-0" />
+                  <a
+                    href={`mailto:${PUBLIC_CONTACT.email}`}
+                    className="hover:text-[#FFB783] transition-colors"
+                  >
+                    {PUBLIC_CONTACT.email}
+                  </a>
                 </div>
               )}
               {PUBLIC_CONTACT.address && (

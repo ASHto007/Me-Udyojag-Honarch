@@ -48,6 +48,22 @@ export function validateEventRegistrationInput(data = {}) {
     errors.phone = 'Please provide a valid 10-digit mobile number.';
   }
 
+  const businessName = typeof data.businessName === 'string' ? data.businessName.trim() : '';
+  if (!businessName) {
+    errors.businessName = 'Business or organization name is required.';
+  } else if (businessName.length < 2) {
+    errors.businessName = 'Business name must be at least 2 characters.';
+  } else if (businessName.length > 150) {
+    errors.businessName = 'Business name cannot exceed 150 characters.';
+  }
+
+  const netWorth = typeof data.netWorth === 'string' ? data.netWorth.trim() : '';
+  if (!netWorth) {
+    errors.netWorth = 'Business turnover or net worth is required.';
+  } else if (netWorth.length > 100) {
+    errors.netWorth = 'Net worth / turnover cannot exceed 100 characters.';
+  }
+
   const cityDistrict = typeof data.cityDistrict === 'string' ? data.cityDistrict.trim() : '';
   if (!cityDistrict) {
     errors.cityDistrict = 'City / District is required.';
@@ -57,12 +73,17 @@ export function validateEventRegistrationInput(data = {}) {
     errors.cityDistrict = 'City / District cannot exceed 100 characters.';
   }
 
-  if (data.consent !== true && data.consent !== 'true') {
-    errors.consent = 'You must consent to be contacted about this event.';
+  const message = typeof data.message === 'string' ? data.message.trim() : '';
+  if (!message) {
+    errors.message = 'Please describe your business and reason for joining.';
+  } else if (message.length < 10) {
+    errors.message = 'Please provide at least 10 characters explaining your business and objectives.';
+  } else if (message.length > 2000) {
+    errors.message = 'Message cannot exceed 2000 characters.';
   }
 
-  if (data.message && typeof data.message === 'string' && data.message.length > 2000) {
-    errors.message = 'Message cannot exceed 2000 characters.';
+  if (data.consent !== true && data.consent !== 'true') {
+    errors.consent = 'You must consent to be contacted about this event.';
   }
 
   return errors;
