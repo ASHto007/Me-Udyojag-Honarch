@@ -254,18 +254,6 @@ export const EventEnquiryModal: React.FC<EventEnquiryModalProps> = ({
         ) : (
           <form onSubmit={handleSubmit} className="p-5 sm:p-6 overflow-y-auto min-h-0 overscroll-contain space-y-4">
           {!EVENT_ENDPOINT && <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"><strong>Form preview.</strong> {PREVIEW_MESSAGE}</p>}
-          {/* Participation Notice */}
-          <div className="p-3.5 rounded-xl bg-orange-50 border border-orange-200 text-xs text-[#92400E] leading-relaxed flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-[#E27500] shrink-0 mt-0.5" />
-            <div>
-              <strong className="block text-[#7C2D12] font-bold text-xs mb-0.5">
-                Invitation-Only Conclave (Turnover Criteria: ₹50+ Cr to ₹100+ Cr):
-              </strong>
-              <span>
-                Participation is strictly curated for high-impact entrepreneurs and business leaders with <strong>₹50+ Cr to ₹100+ Cr turnover</strong>. Please provide your company profile and turnover so the steering committee can review your invitation request.
-              </span>
-            </div>
-          </div>
 
           {/* Full Venue Address Card */}
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
