@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm, ValidationError } from '@formspree/react';
 import { SectionBackdrop } from './SectionBackdrop';
 import { Send, CheckCircle2, AlertCircle, Mail, Phone } from 'lucide-react';
+import { apiClient } from '../services/apiClient';
 
 const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID || 'xzedgebd';
 
@@ -55,6 +56,15 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
     }
 
     setValidationErrors({});
+
+    // 1. Save directly to MongoDB backend REST API (persists in MongoDB & sends emails)
+    apiClient.post('/enquiries', formData).then((res) => {
+      console.log('[Backend Save Success]: Enquiry recorded in MongoDB database', res);
+    }).catch((err) => {
+      console.warn('[Backend Save Note]:', err?.message || err);
+    });
+
+    // 2. Submit to Formspree via @formspree/react hook
     await handleSubmit(e);
   };
 
