@@ -84,23 +84,27 @@ export async function registerForEvent(
   }
 
   try {
-    // 1. Submit directly to Web3Forms over HTTPS (guarantees email delivery to admin)
-    const formData = new FormData();
-    formData.append('access_key', '9f429b26-8194-4934-a377-0cfc8c7f6c81');
-    formData.append('subject', `[New Event Registration] ${payload.eventTitle} - ${payload.fullName}`);
-    formData.append('from_name', 'Mi Udyojak Honarach Events');
-    formData.append('name', payload.fullName);
-    formData.append('email', payload.email);
-    formData.append('phone', payload.phone);
-    formData.append('event_name', payload.eventTitle);
-    formData.append('business_name', payload.businessName);
-    formData.append('turnover_net_worth', payload.netWorth);
-    formData.append('city_district', payload.cityDistrict);
-    formData.append('message', payload.message);
+    // 1. Submit directly to Formspree endpoint over HTTPS
+    const formspreeFormId = import.meta.env.VITE_FORMSPREE_FORM_ID || 'xzedgebd';
+    const formspreeEndpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT || `https://formspree.io/f/${formspreeFormId}`;
 
-    const response = await fetch('https://api.web3forms.com/submit', {
+    const response = await fetch(formspreeEndpoint, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        _subject: `[New Event Registration] ${payload.eventTitle} - ${payload.fullName}`,
+        name: payload.fullName,
+        email: payload.email,
+        phone: payload.phone,
+        event_name: payload.eventTitle,
+        business_name: payload.businessName,
+        turnover_net_worth: payload.netWorth,
+        city_district: payload.cityDistrict,
+        message: payload.message,
+      }),
     });
 
     const data = await response.json();
@@ -110,7 +114,7 @@ export async function registerForEvent(
       console.warn('[Backend Sync Note]:', err?.message || err);
     });
 
-    if (data.success) {
+    if (response.ok) {
       return {
         success: true,
         isPreview: false,
@@ -118,7 +122,7 @@ export async function registerForEvent(
         data,
       };
     } else {
-      throw new Error(data.message || 'Error submitting event registration.');
+      throw new Error(data?.error || data?.errors?.[0]?.message || 'Error submitting event registration.');
     }
   } catch (error: any) {
     // Fallback to backend API

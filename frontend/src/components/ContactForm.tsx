@@ -1,15 +1,9 @@
-import { CONTACT_ENDPOINT } from '../data/submissionConfig';
-import { submitEnquiry, PREVIEW_MESSAGE } from '../services/enquiryService';
-
-interface SubmissionResult {
-  success: boolean;
-  isPreview?: boolean;
-  message: string;
-  errors?: Record<string, string>;
-}
+import React, { useState } from 'react';
+import { useForm, ValidationError } from '@formspree/react';
 import { SectionBackdrop } from './SectionBackdrop';
-import React, { useState, useRef } from 'react';
 import { Send, CheckCircle2, AlertCircle, Mail, Phone } from 'lucide-react';
+
+const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID || 'xzedgebd';
 
 const INITIAL_FORM_DATA = {
   fullName: '',
@@ -22,18 +16,13 @@ const INITIAL_FORM_DATA = {
   consent: false,
 };
 
-export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTACT_ENDPOINT }) => {
+export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_FORM_ID }) => {
+  const [state, handleSubmit, reset] = useForm(formId);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-
-  const [result, setResult] = useState<SubmissionResult | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const pendingRef = useRef(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (pendingRef.current) return;
-    setResult(null);
     const errors: Record<string, string> = {};
 
     if (!formData.fullName.trim()) {
@@ -41,15 +30,14 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
     }
 
     const phoneDigits = formData.phone.replace(/\D/g, '');
-    if (!(phoneDigits.length === 10 || (phoneDigits.length === 12 && phoneDigits.startsWith("91")))) {
+    if (!(phoneDigits.length === 10 || (phoneDigits.length === 12 && phoneDigits.startsWith('91')))) {
       errors.phone = 'Please enter a valid 10-digit mobile number.';
     }
-
 
     const email = formData.email.trim();
     if (!email) {
       errors.email = 'Email Address is required.';
-    } else if ((email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email))) {
+    } else if (email.length > 254 || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) {
       errors.email = 'Please enter a valid email address.';
     }
 
@@ -67,23 +55,13 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
     }
 
     setValidationErrors({});
-    pendingRef.current = true;
-    setIsSubmitting(true);
-    const submissionResult = await submitEnquiry(formData, endpoint);
-    setResult(submissionResult);
-    if (submissionResult.success) {
-      setFormData(INITIAL_FORM_DATA);
-      setValidationErrors({});
-    }
-    pendingRef.current = false;
-    setIsSubmitting(false);
+    await handleSubmit(e);
   };
 
   return (
     <section id="contact" className="section-with-backdrop w-full py-16 sm:py-24 bg-white border-b border-[#EAEAEA]">
       <SectionBackdrop label="CONTACT" />
       <div id="register" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-        
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
           {/* Left Column: Context & Inspiration */}
@@ -129,27 +107,41 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
           <div className="lg:col-span-7">
             <div className="bg-[#FCFBF9] rounded-3xl p-6 sm:p-10 border border-[#EAEAEA] shadow-lg">
               
-              {!endpoint && <p role="status" className="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><strong>Form preview.</strong> {PREVIEW_MESSAGE}</p>}
-              {result && (
-                <div
-                  role={result.success ? 'status' : 'alert'}
-                  className={`mb-5 rounded-2xl border p-4 text-sm flex items-start gap-3 shadow-2xs transition-all ${
-                    result.success
-                      ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-                      : 'border-red-200 bg-red-50 text-red-900'
-                  }`}
-                >
-                  {result.success ? (
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
-                  )}
-                  <div className="flex-1 text-xs sm:text-sm font-semibold leading-relaxed">
-                    {result.message}
+              {state.succeeded ? (
+                <div className="text-center py-8 sm:py-12 px-4 space-y-5 animate-in fade-in zoom-in-95 duration-200">
+                  <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-2xs">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <div className="space-y-2 max-w-md mx-auto">
+                    <h3 className="text-2xl font-extrabold text-[#111827]">
+                      Inquiry Received Successfully!
+                    </h3>
+                    <p className="text-xs sm:text-sm text-[#6D6D6D] leading-relaxed">
+                      Thank you for expressing interest in Mi Udyojak Honarach. We have received your inquiry via Formspree, and our team will connect with you shortly.
+                    </p>
+                  </div>
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        reset();
+                        setFormData(INITIAL_FORM_DATA);
+                        setValidationErrors({});
+                      }}
+                      className="px-6 py-2.5 rounded-full bg-[#E27500] hover:bg-[#C56300] text-white text-xs sm:text-sm font-bold transition-all shadow-md cursor-pointer"
+                    >
+                      Submit Another Inquiry
+                    </button>
                   </div>
                 </div>
-              )}
-                <form onSubmit={handleSubmit} noValidate className="space-y-5">
+              ) : (
+                <form onSubmit={handleFormSubmit} noValidate className="space-y-5">
+                  <input
+                    type="hidden"
+                    name="_subject"
+                    value={`[Mi Udyojak Honarach Inquiry] ${formData.fullName || 'New Website Inquiry'}`}
+                  />
+
                   <div>
                     <h3 className="text-xl font-bold text-[#111827]">
                       Join the Movement &amp; Express Interest
@@ -158,6 +150,18 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                       Fields marked with <span className="text-red-500 font-bold">*</span> are required.
                     </p>
                   </div>
+
+                  {state.errors && !state.succeeded && (
+                    <div
+                      role="alert"
+                      className="rounded-2xl border border-red-200 bg-red-50 text-red-900 p-4 text-xs sm:text-sm flex items-start gap-3 shadow-2xs"
+                    >
+                      <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                      <div className="flex-1 font-semibold leading-relaxed">
+                        Unable to submit inquiry via Formspree. Please verify your details or try again.
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Full Name */}
@@ -191,6 +195,7 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                           {validationErrors.fullName}
                         </p>
                       )}
+                      <ValidationError prefix="Full Name" field="fullName" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                     </div>
 
                     {/* Mobile Number */}
@@ -224,10 +229,11 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                           {validationErrors.phone}
                         </p>
                       )}
+                      <ValidationError prefix="Phone" field="phone" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                     </div>
                   </div>
 
-
+                  {/* Email */}
                   <div>
                     <label htmlFor="contact-email" className="block text-xs font-bold text-[#374151] uppercase mb-1.5">
                       Email Address <span className="text-red-500">*</span>
@@ -248,13 +254,16 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                         if (validationErrors.email) setValidationErrors({ ...validationErrors, email: '' });
                       }}
                       placeholder="name@business.com"
-                      className={`w-full px-4 py-2.5 rounded-xl border bg-white text-sm outline-none transition-all ${validationErrors.email ? 'border-red-500 bg-red-50/30' : 'border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20'}`}
+                      className={`w-full px-4 py-2.5 rounded-xl border bg-white text-sm outline-none transition-all ${
+                        validationErrors.email ? 'border-red-500 bg-red-50/30' : 'border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20'
+                      }`}
                     />
                     {validationErrors.email && (
                       <p id="contact-email-error" className="text-[11px] text-red-600 mt-1 font-medium">
                         {validationErrors.email}
                       </p>
                     )}
+                    <ValidationError prefix="Email" field="email" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -289,6 +298,7 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                           {validationErrors.city}
                         </p>
                       )}
+                      <ValidationError prefix="City" field="city" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                     </div>
 
                     {/* Current Business Stage */}
@@ -307,9 +317,9 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                         <option value="Aspiring Entrepreneur (Idea Stage)">Aspiring Entrepreneur (Idea Stage)</option>
                         <option value="Early Stage / Bootstrapped (< 2 Years)">Early Stage / Bootstrapped (&lt; 2 Years)</option>
                         <option value="Established Micro/Small Business (MSME)">Established Micro/Small Business (MSME)</option>
-                        
                         <option value="Prospective Mentor / Advisor">Prospective Mentor / Advisor</option>
                       </select>
+                      <ValidationError prefix="Stage" field="stage" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                     </div>
                   </div>
 
@@ -331,6 +341,7 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                       <option value="Business Promotion & Exhibitions (Service 02)">Business Promotion &amp; Exhibitions (Service 02)</option>
                       <option value="Awards & Recognition Program (Service 04)">Awards &amp; Recognition Program (Service 04)</option>
                     </select>
+                    <ValidationError prefix="Interest" field="interest" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                   </div>
 
                   {/* Business Idea or Message */}
@@ -347,6 +358,7 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                       placeholder="Tell us briefly about your venture, sector, or guidance required..."
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 bg-white text-sm outline-none transition-all"
                     />
+                    <ValidationError prefix="Message" field="message" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                   </div>
 
                   {/* Contact Consent Checkbox */}
@@ -382,20 +394,20 @@ export const ContactForm: React.FC<{ endpoint?: string }> = ({ endpoint = CONTAC
                   <div className="pt-2">
                     <button
                       type="submit"
-                      disabled={isSubmitting}
-                      className="w-full py-3.5 px-6 rounded-full bg-[#E27500] hover:bg-[#C56300] active:bg-[#B35500] text-white text-sm font-bold tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E27500] group"
+                      disabled={state.submitting}
+                      className="w-full py-3.5 px-6 rounded-full bg-[#E27500] hover:bg-[#C56300] active:bg-[#B35500] text-white text-sm font-bold tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E27500] disabled:opacity-60 disabled:cursor-not-allowed group"
                     >
-                      <span>{isSubmitting ? 'Sending...' : endpoint ? 'Submit Inquiry' : 'Preview Inquiry'}</span>
+                      <span>{state.submitting ? 'Sending...' : 'Submit Inquiry'}</span>
                       <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 </form>
+              )}
 
             </div>
           </div>
 
         </div>
-
       </div>
     </section>
   );

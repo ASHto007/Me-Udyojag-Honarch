@@ -2,10 +2,11 @@ import { apiClient, ApiError } from './apiClient';
 
 export const PREVIEW_MESSAGE = 'Registration is not connected yet. Your details have not been sent.';
 
-const WEB3FORMS_ACCESS_KEY = '9f429b26-8194-4934-a377-0cfc8c7f6c81';
+const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID || 'xzedgebd';
+const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_ENDPOINT || `https://formspree.io/f/${FORMSPREE_FORM_ID}`;
 
 /**
- * Submit general membership / business inquiry via Web3Forms with MongoDB backend persistence.
+ * Submit general membership / business inquiry via Formspree with optional backend persistence.
  * 
  * @param {Object} payload
  * @param {string} payload.fullName
@@ -20,32 +21,33 @@ const WEB3FORMS_ACCESS_KEY = '9f429b26-8194-4934-a377-0cfc8c7f6c81';
  */
 export async function submitEnquiry(payload) {
   try {
-    // 1. Submit directly to Web3Forms over HTTPS (guarantees email delivery to admin)
-    const formData = new FormData();
-    formData.append('access_key', WEB3FORMS_ACCESS_KEY);
-    formData.append('subject', `[New Website Inquiry] ${payload.fullName} - ${payload.interest || 'General'}`);
-    formData.append('from_name', 'Mi Udyojak Honarach Portal');
-    formData.append('name', payload.fullName);
-    formData.append('email', payload.email);
-    formData.append('phone', payload.phone);
-    formData.append('city', payload.city);
-    formData.append('stage', payload.stage || 'Aspiring Entrepreneur');
-    formData.append('interest', payload.interest || 'Mentorship & Guidance');
-    formData.append('message', payload.message || 'No additional message provided');
-
-    const response = await fetch('https://api.web3forms.com/submit', {
+    // 1. Submit directly to Formspree endpoint over HTTPS
+    const response = await fetch(FORMSPREE_ENDPOINT, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        _subject: `[New Website Inquiry] ${payload.fullName} - ${payload.interest || 'General'}`,
+        name: payload.fullName,
+        email: payload.email,
+        phone: payload.phone,
+        city: payload.city,
+        stage: payload.stage || 'Aspiring Entrepreneur',
+        interest: payload.interest || 'Mentorship & Guidance',
+        message: payload.message || 'No additional message provided',
+      }),
     });
 
     const data = await response.json();
 
-    // 2. Also persist to MongoDB backend in background
+    // 2. Also attempt background persistence to MongoDB backend if configured
     apiClient.post('/enquiries', payload).catch((err) => {
       console.warn('[Backend Sync Note]:', err?.message || err);
     });
 
-    if (data.success) {
+    if (response.ok) {
       return {
         success: true,
         isPreview: false,
@@ -53,10 +55,10 @@ export async function submitEnquiry(payload) {
         data,
       };
     } else {
-      throw new Error(data.message || 'Error submitting enquiry.');
+      throw new Error(data?.error || data?.errors?.[0]?.message || 'Error submitting enquiry.');
     }
   } catch (error) {
-    // Fallback to backend API if web3forms encounters network limits
+    // Fallback to backend API if Formspree encounters network issues
     try {
       const fallbackResponse = await apiClient.post('/enquiries', payload);
       return {
