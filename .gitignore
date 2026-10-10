@@ -11,12 +11,17 @@ frontend/dist/
 .env
 .env.local
 .env.production
+.env.example
+.en.example
+*.env.example
 frontend/.env
 frontend/.env.local
 frontend/.env.production
+frontend/.env.example
 backend/.env
 backend/.env.local
 backend/.env.production
+backend/.env.example
 
 # Logs
 *.log
