@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-import { useForm, ValidationError } from '@formspree/react';
 import { SectionBackdrop } from './SectionBackdrop';
 import { Send, CheckCircle2, AlertCircle, Mail, Phone } from 'lucide-react';
-import { apiClient } from '../services/apiClient';
-
-const FORMSPREE_FORM_ID = import.meta.env.VITE_FORMSPREE_FORM_ID || 'xzedgebd';
+import { submitEnquiry } from '../services/enquiryService';
 
 const INITIAL_FORM_DATA = {
   fullName: '',
@@ -17,10 +14,12 @@ const INITIAL_FORM_DATA = {
   consent: false,
 };
 
-export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_FORM_ID }) => {
-  const [state, handleSubmit, reset] = useForm(formId);
+export const ContactForm: React.FC = () => {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSucceeded, setIsSucceeded] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,16 +55,22 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
     }
 
     setValidationErrors({});
+    setIsSubmitting(true);
+    setErrorMessage(null);
 
-    // 1. Save directly to MongoDB backend REST API (persists in MongoDB & sends emails)
-    apiClient.post('/enquiries', formData).then((res) => {
-      console.log('[Backend Save Success]: Enquiry recorded in MongoDB database', res);
-    }).catch((err) => {
-      console.warn('[Backend Save Note]:', err?.message || err);
-    });
-
-    // 2. Submit to Formspree via @formspree/react hook
-    await handleSubmit(e);
+    try {
+      const result = await submitEnquiry(formData);
+      if (result.success) {
+        setIsSucceeded(true);
+        setFormData(INITIAL_FORM_DATA);
+      } else {
+        setErrorMessage(result.message || 'Unable to submit inquiry. Please try again.');
+      }
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Unable to submit inquiry. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -117,7 +122,7 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
           <div className="lg:col-span-7">
             <div className="bg-[#FCFBF9] rounded-3xl p-6 sm:p-10 border border-[#EAEAEA] shadow-lg">
               
-              {state.succeeded ? (
+              {isSucceeded ? (
                 <div className="text-center py-8 sm:py-12 px-4 space-y-5 animate-in fade-in zoom-in-95 duration-200">
                   <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-2xs">
                     <CheckCircle2 className="w-8 h-8" />
@@ -127,16 +132,17 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                       Inquiry Received Successfully!
                     </h3>
                     <p className="text-xs sm:text-sm text-[#6D6D6D] leading-relaxed">
-                      Thank you for expressing interest in Mi Udyojak Honarach. We have received your inquiry via Formspree, and our team will connect with you shortly.
+                      Thank you for expressing interest in Mi Udyojak Honarach. We have received your inquiry, and our team will connect with you shortly.
                     </p>
                   </div>
                   <div className="pt-2">
                     <button
                       type="button"
                       onClick={() => {
-                        reset();
+                        setIsSucceeded(false);
                         setFormData(INITIAL_FORM_DATA);
                         setValidationErrors({});
+                        setErrorMessage(null);
                       }}
                       className="px-6 py-2.5 rounded-full bg-[#E27500] hover:bg-[#C56300] text-white text-xs sm:text-sm font-bold transition-all shadow-md cursor-pointer"
                     >
@@ -146,12 +152,6 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                 </div>
               ) : (
                 <form onSubmit={handleFormSubmit} noValidate className="space-y-5">
-                  <input
-                    type="hidden"
-                    name="_subject"
-                    value={`[Mi Udyojak Honarach Inquiry] ${formData.fullName || 'New Website Inquiry'}`}
-                  />
-
                   <div>
                     <h3 className="text-xl font-bold text-[#111827]">
                       Join the Movement &amp; Express Interest
@@ -161,14 +161,14 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                     </p>
                   </div>
 
-                  {state.errors && !state.succeeded && (
+                  {errorMessage && (
                     <div
                       role="alert"
                       className="rounded-2xl border border-red-200 bg-red-50 text-red-900 p-4 text-xs sm:text-sm flex items-start gap-3 shadow-2xs"
                     >
                       <AlertCircle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
                       <div className="flex-1 font-semibold leading-relaxed">
-                        Unable to submit inquiry via Formspree. Please verify your details or try again.
+                        {errorMessage}
                       </div>
                     </div>
                   )}
@@ -205,7 +205,6 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                           {validationErrors.fullName}
                         </p>
                       )}
-                      <ValidationError prefix="Full Name" field="fullName" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                     </div>
 
                     {/* Mobile Number */}
@@ -239,7 +238,6 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                           {validationErrors.phone}
                         </p>
                       )}
-                      <ValidationError prefix="Phone" field="phone" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                     </div>
                   </div>
 
@@ -273,7 +271,6 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                         {validationErrors.email}
                       </p>
                     )}
-                    <ValidationError prefix="Email" field="email" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -308,7 +305,6 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                           {validationErrors.city}
                         </p>
                       )}
-                      <ValidationError prefix="City" field="city" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                     </div>
 
                     {/* Current Business Stage */}
@@ -329,7 +325,6 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                         <option value="Established Micro/Small Business (MSME)">Established Micro/Small Business (MSME)</option>
                         <option value="Prospective Mentor / Advisor">Prospective Mentor / Advisor</option>
                       </select>
-                      <ValidationError prefix="Stage" field="stage" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                     </div>
                   </div>
 
@@ -351,7 +346,6 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                       <option value="Business Promotion & Exhibitions (Service 02)">Business Promotion &amp; Exhibitions (Service 02)</option>
                       <option value="Awards & Recognition Program (Service 04)">Awards &amp; Recognition Program (Service 04)</option>
                     </select>
-                    <ValidationError prefix="Interest" field="interest" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                   </div>
 
                   {/* Business Idea or Message */}
@@ -368,7 +362,6 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                       placeholder="Tell us briefly about your venture, sector, or guidance required..."
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-[#E27500] focus:ring-2 focus:ring-[#E27500]/20 bg-white text-sm outline-none transition-all"
                     />
-                    <ValidationError prefix="Message" field="message" errors={state.errors} className="text-[11px] text-red-600 mt-1 font-medium" />
                   </div>
 
                   {/* Contact Consent Checkbox */}
@@ -404,10 +397,10 @@ export const ContactForm: React.FC<{ formId?: string }> = ({ formId = FORMSPREE_
                   <div className="pt-2">
                     <button
                       type="submit"
-                      disabled={state.submitting}
+                      disabled={isSubmitting}
                       className="w-full py-3.5 px-6 rounded-full bg-[#E27500] hover:bg-[#C56300] active:bg-[#B35500] text-white text-sm font-bold tracking-wide transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E27500] disabled:opacity-60 disabled:cursor-not-allowed group"
                     >
-                      <span>{state.submitting ? 'Sending...' : 'Submit Inquiry'}</span>
+                      <span>{isSubmitting ? 'Sending...' : 'Submit Inquiry'}</span>
                       <Send className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>

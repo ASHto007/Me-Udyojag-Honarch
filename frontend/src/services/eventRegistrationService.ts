@@ -1,4 +1,4 @@
-import { apiClient, ApiError } from './apiClient';
+import { submitEventRegistrationToGoogleSheet } from './googleSheetService';
 
 export const PREVIEW_MESSAGE = 'Registration is not connected yet. Your details have not been sent.';
 
@@ -84,71 +84,30 @@ export async function registerForEvent(
   }
 
   try {
-    // 1. Submit directly to Formspree endpoint over HTTPS
-    const formspreeFormId = import.meta.env.VITE_FORMSPREE_FORM_ID || 'xzedgebd';
-    const formspreeEndpoint = import.meta.env.VITE_FORMSPREE_ENDPOINT || `https://formspree.io/f/${formspreeFormId}`;
+    const sheetResult = await submitEventRegistrationToGoogleSheet(payload);
 
-    const response = await fetch(formspreeEndpoint, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        _subject: `[New Event Registration] ${payload.eventTitle} - ${payload.fullName}`,
-        name: payload.fullName,
-        email: payload.email,
-        phone: payload.phone,
-        event_name: payload.eventTitle,
-        business_name: payload.businessName,
-        turnover_net_worth: payload.netWorth,
-        city_district: payload.cityDistrict,
-        message: payload.message,
-      }),
-    });
-
-    const data = await response.json();
-
-    // 2. Also persist to MongoDB backend in background
-    apiClient.post('/event-registrations', payload).catch((err) => {
-      console.warn('[Backend Sync Note]:', err?.message || err);
-    });
-
-    if (response.ok) {
+    if (sheetResult.success) {
       return {
         success: true,
         isPreview: false,
-        message: `Registration request submitted for ${payload.eventTitle.trim()}. Your request has been sent for admin review. Once approved, you will receive a confirmation email.`,
-        data,
+        message:
+          sheetResult.message ||
+          `Registration request submitted for ${payload.eventTitle.trim()}. Your request has been sent for admin review.`,
+        data: sheetResult.data,
       };
-    } else {
-      throw new Error(data?.error || data?.errors?.[0]?.message || 'Error submitting event registration.');
     }
+
+    return {
+      success: false,
+      isPreview: false,
+      message: sheetResult.message || 'Failed to submit registration. Please try again.',
+    };
   } catch (error: any) {
-    // Fallback to backend API
-    try {
-      const response = await apiClient.post('/event-registrations', payload);
-      return {
-        success: true,
-        isPreview: false,
-        message: response.message || `Registration request submitted for ${payload.eventTitle.trim()}.`,
-        data: response.data,
-      };
-    } catch (fallbackErr: any) {
-      if (fallbackErr instanceof ApiError) {
-        return {
-          success: false,
-          isPreview: false,
-          message: fallbackErr.message,
-          errors: (fallbackErr.data as { errors?: Record<string, string> })?.errors,
-        };
-      }
-      return {
-        success: false,
-        isPreview: false,
-        message: error?.message || 'Failed to complete registration. Please try again later.',
-      };
-    }
+    return {
+      success: false,
+      isPreview: false,
+      message: error?.message || 'Failed to complete registration. Please check your connection and try again.',
+    };
   }
 }
 
