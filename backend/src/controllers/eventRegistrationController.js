@@ -3,6 +3,7 @@ import { normalizeEmail } from '../utils/normalizeEmail.js';
 import { normalizePhone } from '../utils/normalizePhone.js';
 import { stripHtml } from '../utils/sanitize.js';
 import { sendEventAdminEmail, sendEventUserEmail } from '../services/emailService.js';
+import { syncEventRegistrationToGoogleSheet } from '../services/googleSheetService.js';
 
 /**
  * Handle new event registration submission with duplicate protection.
@@ -65,16 +66,17 @@ export async function createEventRegistration(req, res, next) {
       Promise.allSettled([
         sendEventAdminEmail(registration),
         sendEventUserEmail(registration),
+        syncEventRegistrationToGoogleSheet(registration),
       ]).then((results) => {
-        const types = ['Admin event notification', 'User event confirmation'];
+        const types = ['Admin event notification', 'User event confirmation', 'Google Sheet sync'];
         results.forEach((res, i) => {
           if (res.status === 'rejected') {
-            console.error(`[Event Email Error - ${types[i]}]:`, res.reason?.message || res.reason);
+            console.error(`[Event Dispatch Error - ${types[i]}]:`, res.reason?.message || res.reason);
           } else {
-            console.log(`[Event Email Success - ${types[i]}]: Sent (messageId: ${res.value?.messageId || 'OK'})`);
+            console.log(`[Event Dispatch Success - ${types[i]}]: Sent / Synced`);
           }
         });
-      }).catch((err) => console.error('[Event Email Dispatch Warning]:', err));
+      }).catch((err) => console.error('[Event Dispatch Warning]:', err));
     });
   } catch (error) {
     next(error);

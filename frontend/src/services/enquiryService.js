@@ -3,7 +3,8 @@ import { submitEnquiryToGoogleSheet } from './googleSheetService';
 export const PREVIEW_MESSAGE = 'Registration is not connected yet. Your details have not been sent.';
 
 /**
- * Submit general membership / business inquiry directly to Google Sheets.
+ * Submit general membership / business inquiry directly via Google Sheets Webhook.
+ * Pure frontend webhook with zero backend interaction.
  * 
  * @param {Object} payload
  * @param {string} payload.fullName

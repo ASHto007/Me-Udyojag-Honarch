@@ -1,18 +1,19 @@
 /**
  * Backend Google Sheets Service
  * 
- * Synchronizes enquiries and event registrations to Google Sheets via Google Apps Script Webhook.
- * Matches exact Apps Script `doPost` schema and secret authentication.
+ * Synchronizes enquiries and event registrations securely to Google Sheets via Google Apps Script Webhook.
+ * Secrets and Webhook URLs are retrieved strictly from server-side environment variables and never exposed to the client.
  */
 
-const DEFAULT_GOOGLE_SHEET_URL =
-  process.env.GOOGLE_SHEET_WEBHOOK_URL ||
-  'https://script.google.com/macros/s/AKfycbwFA2Yi86N8JoR-RKRj8jsew8Y5_zdPkRiIoNcpwTczeOeB34Lzm4vS0PuhgtyKEXNQnA/exec';
+import { config } from '../config/env.js';
 
-const DEFAULT_GOOGLE_SHEET_SECRET =
-  process.env.GOOGLE_SHEET_SECRET ||
-  process.env.GOOGLE_SHEET_KEY ||
-  '01729666eb1d32b654fcd13384eb800d682df6553f7dab6520bbd5601dc55cc1';
+function getWebhookUrl() {
+  return config.googleSheet?.webhookUrl || process.env.GOOGLE_SHEET_WEBHOOK_URL || '';
+}
+
+function getWebhookSecret() {
+  return config.googleSheet?.secret || process.env.GOOGLE_SHEET_SECRET || process.env.GOOGLE_SHEET_KEY || '';
+}
 
 /**
  * Dispatch payload to Google Sheets webhook via Node fetch.
@@ -20,14 +21,16 @@ const DEFAULT_GOOGLE_SHEET_SECRET =
  * @param {Record<string, any>} payload
  * @param {string} [webhookUrl]
  */
-export async function appendToGoogleSheet(payload, webhookUrl = DEFAULT_GOOGLE_SHEET_URL) {
+export async function appendToGoogleSheet(payload, webhookUrl = getWebhookUrl()) {
+  const secret = getWebhookSecret();
+
   if (!webhookUrl || !webhookUrl.startsWith('http')) {
-    console.warn('[Backend GoogleSheetService]: No valid webhook URL configured.');
+    console.warn('[Backend GoogleSheetService]: GOOGLE_SHEET_WEBHOOK_URL is not configured in backend/.env.');
     return { success: false, message: 'Google Sheet webhook URL not configured' };
   }
 
-  if (!payload.secret) {
-    payload.secret = DEFAULT_GOOGLE_SHEET_SECRET;
+  if (!payload.secret && secret) {
+    payload.secret = secret;
   }
 
   try {
@@ -67,7 +70,7 @@ export async function appendToGoogleSheet(payload, webhookUrl = DEFAULT_GOOGLE_S
  */
 export async function syncEnquiryToGoogleSheet(enquiry) {
   const payload = {
-    secret: enquiry.secret || DEFAULT_GOOGLE_SHEET_SECRET,
+    secret: enquiry.secret || getWebhookSecret(),
     type: 'enquiry',
     fullName: enquiry.fullName || '',
     email: enquiry.email || '',
@@ -90,7 +93,7 @@ export async function syncEnquiryToGoogleSheet(enquiry) {
  */
 export async function syncEventRegistrationToGoogleSheet(registration) {
   const payload = {
-    secret: registration.secret || DEFAULT_GOOGLE_SHEET_SECRET,
+    secret: registration.secret || getWebhookSecret(),
     type: 'event_registration',
     eventId: registration.eventId || '',
     eventTitle: registration.eventTitle || '',

@@ -24,7 +24,8 @@ export interface RegistrationResult {
 }
 
 /**
- * Submit event registration / conclave inquiry to the backend REST API.
+ * Submit event registration directly via Google Sheets Webhook.
+ * Pure frontend webhook with zero backend interaction.
  */
 export async function registerForEvent(
   payload: EventRegistrationPayload
@@ -58,8 +59,8 @@ export async function registerForEvent(
     errors.businessName = 'Business or organization name is required.';
   }
 
-  if (!payload.netWorth || !payload.netWorth.trim()) {
-    errors.netWorth = 'Business turnover / net worth is required.';
+  if (!payload.netWorth || payload.netWorth.trim().length < 1) {
+    errors.netWorth = 'Please provide your net worth or turnover range.';
   }
 
   if (!payload.cityDistrict || payload.cityDistrict.trim().length < 2) {
@@ -67,11 +68,11 @@ export async function registerForEvent(
   }
 
   if (!payload.message || payload.message.trim().length < 10) {
-    errors.message = 'Please share details about your business and why you want to join (at least 10 characters).';
+    errors.message = 'Please provide details about your business and why you want to join (minimum 10 characters).';
   }
 
   if (!payload.consent) {
-    errors.consent = 'You must consent to be contacted about this event.';
+    errors.consent = 'Consent is required to proceed.';
   }
 
   if (Object.keys(errors).length > 0) {

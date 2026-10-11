@@ -1,39 +1,19 @@
 /**
  * Google Sheets Service
  * 
- * Synchronizes website contact inquiries and event registrations directly
- * to Google Sheets via Google Apps Script Web App Webhook.
- * 
- * Supports secure WEBHOOK_SECRET verification matching the Apps Script deployment.
+ * Client-side transport helper for Google Apps Script Web App Webhook.
+ * All credentials/URLs are strictly read from environment variables;
+ * zero secrets or private URLs are hardcoded in the codebase.
  */
 
-export const DEFAULT_GOOGLE_SHEET_URL =
-  'https://script.google.com/macros/s/AKfycbwFA2Yi86N8JoR-RKRj8jsew8Y5_zdPkRiIoNcpwTczeOeB34Lzm4vS0PuhgtyKEXNQnA/exec';
-
-export const DEFAULT_GOOGLE_SHEET_SECRET =
-  '01729666eb1d32b654fcd13384eb800d682df6553f7dab6520bbd5601dc55cc1';
-
 export function getWebhookUrl() {
-  const envUrl =
-    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOOGLE_SHEET_WEBHOOK_URL) ||
-    (typeof import.meta !== 'undefined' && import.meta.env?.GOOGLE_SHEET_WEBHOOK_URL);
-
-  if (typeof envUrl === 'string' && envUrl.trim().startsWith('http')) {
-    return envUrl.trim();
-  }
-  return DEFAULT_GOOGLE_SHEET_URL;
+  const envUrl = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_GOOGLE_SHEET_WEBHOOK_URL : '';
+  return typeof envUrl === 'string' && envUrl.trim().startsWith('http') ? envUrl.trim() : '';
 }
 
 export function getWebhookSecret() {
-  const envSecret =
-    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GOOGLE_SHEET_SECRET) ||
-    (typeof import.meta !== 'undefined' && import.meta.env?.GOOGLE_SHEET_SECRET) ||
-    (typeof import.meta !== 'undefined' && import.meta.env?.GOOGLE_SHEET_KEY);
-
-  if (typeof envSecret === 'string' && envSecret.trim()) {
-    return envSecret.trim();
-  }
-  return DEFAULT_GOOGLE_SHEET_SECRET;
+  const envSecret = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_GOOGLE_SHEET_SECRET : '';
+  return typeof envSecret === 'string' ? envSecret.trim() : '';
 }
 
 /**
@@ -45,14 +25,15 @@ export function getWebhookSecret() {
  */
 export async function appendToGoogleSheet(payload, webhookUrl = getWebhookUrl()) {
   if (!webhookUrl || !webhookUrl.startsWith('http')) {
-    const errorMsg = 'Google Sheet webhook URL is not configured or invalid.';
+    const errorMsg = 'Google Sheet webhook URL is not configured in environment.';
     console.warn(`[GoogleSheetService]: ${errorMsg}`);
     return { success: false, message: errorMsg };
   }
 
-  // Ensure secret is always attached if missing
-  if (!payload.secret) {
-    payload.secret = getWebhookSecret();
+  // Attach secret if provided via environment
+  const secret = getWebhookSecret();
+  if (!payload.secret && secret) {
+    payload.secret = secret;
   }
 
   const jsonBody = JSON.stringify(payload);
@@ -118,7 +99,6 @@ export async function appendToGoogleSheet(payload, webhookUrl = getWebhookUrl())
 
 /**
  * Submit general contact inquiry to Google Sheets.
- * Matches exact Apps Script `data.type === "enquiry"` schema.
  * 
  * @param {Object} data
  * @param {string} [data.secret]
@@ -155,7 +135,6 @@ export async function submitEnquiryToGoogleSheet(data, customWebhookUrl) {
 
 /**
  * Submit event registration to Google Sheets.
- * Matches exact Apps Script `data.type === "event_registration"` schema.
  * 
  * @param {Object} data
  * @param {string} [data.secret]
@@ -206,6 +185,4 @@ export default {
   sendToGoogleSheet,
   getWebhookUrl,
   getWebhookSecret,
-  DEFAULT_GOOGLE_SHEET_URL,
-  DEFAULT_GOOGLE_SHEET_SECRET,
 };

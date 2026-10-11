@@ -3,6 +3,7 @@ import { normalizeEmail } from '../utils/normalizeEmail.js';
 import { normalizePhone } from '../utils/normalizePhone.js';
 import { stripHtml } from '../utils/sanitize.js';
 import { sendEnquiryAdminEmail, sendEnquiryUserEmail } from '../services/emailService.js';
+import { syncEnquiryToGoogleSheet } from '../services/googleSheetService.js';
 
 /**
  * Handle new general enquiry submission.
@@ -54,16 +55,17 @@ export async function createEnquiry(req, res, next) {
       Promise.allSettled([
         sendEnquiryAdminEmail(enquiry),
         sendEnquiryUserEmail(enquiry),
+        syncEnquiryToGoogleSheet(enquiry),
       ]).then((results) => {
-        const types = ['Admin notification', 'User confirmation'];
+        const types = ['Admin notification', 'User confirmation', 'Google Sheet sync'];
         results.forEach((res, i) => {
           if (res.status === 'rejected') {
-            console.error(`[Email Error - ${types[i]}]:`, res.reason?.message || res.reason);
+            console.error(`[Dispatch Error - ${types[i]}]:`, res.reason?.message || res.reason);
           } else {
-            console.log(`[Email Success - ${types[i]}]: Sent (messageId: ${res.value?.messageId || 'OK'})`);
+            console.log(`[Dispatch Success - ${types[i]}]: Sent / Synced`);
           }
         });
-      }).catch((err) => console.error('[Email Dispatch Warning]:', err));
+      }).catch((err) => console.error('[Dispatch Warning]:', err));
     });
   } catch (error) {
     next(error);

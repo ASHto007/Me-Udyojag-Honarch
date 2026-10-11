@@ -35,6 +35,10 @@ export const config = {
     user: (process.env.SMTP_USER || '').trim(),
     pass: (process.env.SMTP_PASS || '').replace(/\s+/g, ''),
   },
+  googleSheet: {
+    webhookUrl: (process.env.GOOGLE_SHEET_WEBHOOK_URL || '').trim(),
+    secret: (process.env.GOOGLE_SHEET_SECRET || process.env.GOOGLE_SHEET_KEY || '').trim(),
+  },
 };
 
 export default config;
