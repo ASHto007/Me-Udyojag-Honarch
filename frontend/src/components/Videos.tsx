@@ -44,7 +44,7 @@ export function Videos() {
                     <Play className="ml-0.5 h-6 w-6" fill="currentColor" />
                   </span>
                 </span>
-                <span aria-hidden="true" className="absolute bottom-3 right-4 font-mono text-xs text-white/90">{String(index + 1).padStart(2, '0')} / 06</span>
+                <span aria-hidden="true" className="absolute bottom-3 right-4 font-mono text-xs text-white/90">{String(index + 1).padStart(2, '0')} / {String(YOUTUBE_VIDEOS.length).padStart(2, '0')}</span>
               </button>
               <div className="p-5">
                 <p className="mb-2 text-xs font-semibold text-[#9A4D00]">{video.label}</p>
@@ -80,7 +80,7 @@ export function Videos() {
             </div>
             <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-xs text-gray-300 sm:px-6">
               <span>Mi Udyojak Honarach</span>
-              <a href={'https://www.youtube.com/watch?v=' + selected.id} target="_blank" rel="noopener noreferrer"
+              <a href={selected.isShort ? 'https://www.youtube.com/shorts/' + selected.id : 'https://www.youtube.com/watch?v=' + selected.id} target="_blank" rel="noopener noreferrer"
                 className="inline-flex min-h-11 items-center gap-1.5 rounded-md font-semibold text-orange-200 hover:text-white focus-visible:outline-2 focus-visible:outline-[#E27500]">
                 Open on YouTube <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
               </a>

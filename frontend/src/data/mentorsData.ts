@@ -32,29 +32,30 @@ export interface MentorProfile {
  * Array of verified mentors.
  */
 export const APPROVED_MENTORS: MentorProfile[] = [
+
   {
     id: 'mentor-1',
-    name: 'Santosh Patil',
-    company: "UK's Resort",
-    photo: '/assets/mentor-1-refined.webp',
-  },
-  {
-    id: 'mentor-2',
-    name: 'Suresh Havare',
-    company: 'Havare Group',
+    name: 'Suresh Haware',
+    company: 'Haware Group',
     photo: '/assets/mentor-2-refined.webp',
   },
   {
-    id: 'mentor-3',
-    name: 'Ajit Marathe',
+    id: 'mentor-2',
+    name: 'Dr. Ajit Marathe',
     company: 'Nirman Group',
     photo: '/assets/mentor-3-refined.webp',
   },
   {
-    id: 'mentor-4',
-    name: 'Ravindra Prabhudesai',
+    id: 'mentor-3',
+    name: 'Dr. Ravindra Prabhudesai',
     company: 'Pitambari Products Pvt',
     photo: '/assets/mentor-4-refined.webp',
+  },
+  {
+    id: 'mentor-4',
+    name: 'Dr. Pawan Agrawal',
+    company: 'PhD, Mumbai Dabbawala',
+    photo: '/assets/mentor-6-refined.webp',
   },
   {
     id: 'mentor-5',
@@ -64,8 +65,9 @@ export const APPROVED_MENTORS: MentorProfile[] = [
   },
   {
     id: 'mentor-6',
-    name: 'Dr. Pawan Agrawal',
-    company: 'PhD, Mumbai Dabbawala',
-    photo: '/assets/mentor-6-refined.webp',
+    name: 'Santosh Patil',
+    company: "UK's Resort",
+    photo: '/assets/mentor-1-refined.webp',
   },
+
 ];
