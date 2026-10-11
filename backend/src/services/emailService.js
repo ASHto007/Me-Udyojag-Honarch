@@ -6,7 +6,7 @@ import { config } from '../config/env.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const LOCAL_LOGO_PATH = path.resolve(__dirname, '../assets/logo.png');
+const LOCAL_LOGO_PATH = path.resolve(__dirname, '../assets/logo.jpeg');
 
 let transporter = null;
 
@@ -77,7 +77,7 @@ function getLogoConfig() {
         logoSrc: 'cid:brand-logo@miudyojakhonarach',
         attachments: [
           {
-            filename: 'logo.png',
+            filename: 'logo.jpeg',
             path: LOCAL_LOGO_PATH,
             cid: 'brand-logo@miudyojakhonarach',
           },
@@ -90,7 +90,7 @@ function getLogoConfig() {
 
   const frontendUrl = (config.frontendUrl || 'https://miudyojakhonarach.com').replace(/\/+$/, '');
   return {
-    logoSrc: `${frontendUrl}/assets/logo.png`,
+    logoSrc: `${frontendUrl}/assets/logo.jpeg`,
     attachments: [],
   };
 }

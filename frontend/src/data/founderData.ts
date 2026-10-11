@@ -29,7 +29,7 @@ export const FOUNDER_DATA: FounderProfile = {
   marathiName: 'निलेश मोरे',
   role: 'Founder & Convener',
   organization: 'Mi Udyojak Honarach',
-  photo: '/assets/nilesh-more.jpg',
+  photo: '/assets/nilesh-more.jpeg',
   bio: 'Entrepreneur, Educator & Community Builder empowering first-generation business creators across Maharashtra.',
   quote: 'Mi Udyojak Honarach is not merely a declaration; it is the beginning of an entrepreneurial journey.',
   paragraphs: [

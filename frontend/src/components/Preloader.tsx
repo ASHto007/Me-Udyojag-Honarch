@@ -74,7 +74,7 @@ export const Preloader: React.FC<PreloaderProps> = ({
         {/* Logo Card */}
         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white p-3.5 shadow-2xl border border-white/20 flex items-center justify-center mb-6 transition-transform duration-500 hover:scale-105">
           <img
-            src="/assets/logo.png"
+            src="/assets/logo.jpeg"
             alt="Mi Udyojak Honarach"
             width={96}
             height={96}

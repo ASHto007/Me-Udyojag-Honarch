@@ -31,7 +31,7 @@ export const Founder: React.FC = () => {
                 {/* Real Founder Photo Frame */}
                 <div className="relative w-full aspect-[4/5] overflow-hidden bg-[#0B1320]">
                   <img
-                    src="/assets/nilesh-more.jpg"
+                    src="/assets/nilesh-more.jpeg"
                     alt="Nilesh More - Founder & Convener"
                     className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
                   />

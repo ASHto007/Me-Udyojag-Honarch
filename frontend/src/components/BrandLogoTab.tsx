@@ -30,7 +30,7 @@ export const BrandLogoTab: React.FC = () => {
         aria-label="Mi Udyojak Honarach — Return to top of page"
       >
         <img
-          src="/assets/logo.png"
+          src="/assets/logo.jpeg"
           alt="Mi Udyojak Honarach Logo"
           className="w-full h-auto object-contain block"
           width={148}

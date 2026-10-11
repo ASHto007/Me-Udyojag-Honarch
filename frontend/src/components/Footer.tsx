@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
               <img
-                src="/assets/logo.png"
+                src="/assets/logo.jpeg"
                 alt="Mi Udyojak Honarach Logo"
                 className="h-12 w-auto object-contain bg-white rounded-lg p-1"
                 width={48}

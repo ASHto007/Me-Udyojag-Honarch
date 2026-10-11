@@ -40,7 +40,7 @@ export const APPROVED_STATISTICS: VerifiedStatistic[] = [
   {
     id: 'stat-events',
     label: 'Events Conducted',
-    value: '150+',
+    value: '1000+',
     source: 'Statewide registration and seminar logs 2018-2026'
   },
   {
@@ -58,7 +58,7 @@ export const APPROVED_STATISTICS: VerifiedStatistic[] = [
   {
     id: 'stat-journey',
     label: 'Years of Journey',
-    value: '8+',
+    value: '15+',
     source: 'Statewide registration and seminar logs 2018-2026'
   },
 
