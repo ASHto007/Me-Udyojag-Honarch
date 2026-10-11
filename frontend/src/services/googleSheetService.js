@@ -7,12 +7,18 @@
  */
 
 export function getWebhookUrl() {
-  const envUrl = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_GOOGLE_SHEET_WEBHOOK_URL : '';
+  const envUrl =
+    typeof import.meta !== 'undefined'
+      ? (import.meta.env?.GOOGLE_SHEET_WEBHOOK_URL || import.meta.env?.VITE_GOOGLE_SHEET_WEBHOOK_URL)
+      : '';
   return typeof envUrl === 'string' && envUrl.trim().startsWith('http') ? envUrl.trim() : '';
 }
 
 export function getWebhookSecret() {
-  const envSecret = typeof import.meta !== 'undefined' ? import.meta.env?.VITE_GOOGLE_SHEET_SECRET : '';
+  const envSecret =
+    typeof import.meta !== 'undefined'
+      ? (import.meta.env?.GOOGLE_SHEET_SECRET || import.meta.env?.VITE_GOOGLE_SHEET_SECRET)
+      : '';
   return typeof envSecret === 'string' ? envSecret.trim() : '';
 }
 
